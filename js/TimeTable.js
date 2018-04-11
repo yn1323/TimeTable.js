@@ -8,7 +8,7 @@ class TimeTable{
         this.divTime    = data['divTime'];   // Unit to Divide time(minutes)
         this.shift      = data['shift'];     // Time Table Data
         //this.setOptions = this.setOptions(option); // Other option
-        console.log(this.startTime,this.endTime,this.divTime);
+        console.log(this.startTime,this.endTime,this.divTime,this.shift);
     }
     get startTime() {return this.START_TIME}
     set startTime(x){if(this.v.checkStartTime(x))this.START_TIME = this.v.checkStartTime(x)}
@@ -42,14 +42,20 @@ class Message{
     */
     setErrorMessage(){
         // About Time
-        this.ermsg['TIME_LENGTH']       = "TIME LENGTH IS NOT 5. IT HAS TO BE FORMAT OF 'HH:MM'";
-        this.ermsg['TIME_DELIMETER']    = "DELIMETER SHOULD BE ':' in 3rd character";
-        this.ermsg['TIME_HOUR_RANGE']   = "HOUR HAS TO BE BETWEEN 00 to 23";
-        this.ermsg['TIME_MINUTE_RANGE'] = "MINUTS HAS TO BE BETWEEN 00 to 59";
-        this.ermsg['DIVTIME_RANGE']     = "DIV TIME HAS TO BE BETWEEN 1 to 60";
+        this.ermsg['TIME_LENGTH']        = "[TIME] TIME LENGTH IS NOT 5. FORMAT HAS TO BE 'HH:MM'";
+        this.ermsg['TIME_DELIMETER']     = "[TIME] DELIMETER SHOULD BE ':' IN 3RD CHARACTER";
+        this.ermsg['TIME_HOUR_RANGE']    = "[TIME] HOUR HAS TO BE BETWEEN 00 to 23";
+        this.ermsg['TIME_MINUTE_RANGE']  = "[TIME] MINUTS HAS TO BE BETWEEN 00 to 59";
+        this.ermsg['DIVTIME_RANGE']      = "[TIME] DIV TIME HAS TO BE BETWEEN 1 to 60";
+        // About Shift
+        this.ermsg['SHIFT_LENGTH']       = "[SHIFT] TIME LENGTH IS NOT 11. FORMAT HAS TO BE 'HH:MM-HH:MM'";
+        this.ermsg['SHIFT_DELIMETER']    = "[SHIFT] DELIMETER SHOULD BE '-' IN 6TH CHARACTER";
+        this.ermsg['SHIFT_TIME']         = "[SHIFT] TIME";
+        this.ermsg['SHIFT_COLOR_LENGTH'] = "[TIME] TIME LENGTH IS NOT 1.";
+        this.ermsg['SHIFT_COLOR_RANGE']  = "[SHIFT] COLOR HAS TO BE BETWEEN 1 to 9";
         // About Data Type
-        this.ermsg['STRING_DATA_TYPE'] = "HAS TO BE STRING";
-        this.ermsg['NOT_NUMBER']       = "HAS TO BE NUMBER";
+        this.ermsg['STRING_DATA_TYPE']  = "[DATA] HAS TO BE STRING";
+        this.ermsg['NOT_NUMBER']        = "[DATA] HAS TO BE NUMBER";
     }
 }
 
@@ -70,7 +76,7 @@ class Validation extends Message{
     */
     checkStartTime(time){
         // Validation
-        if(!this.timeValidation(time))return false;
+        if(!this.timeValidation(time))return 0;
         let intTime = this.calc.time2Int(time);
         // Only when required 24 hours time schedule
         if(this.data['startTime'] === this.data['endTime']){
@@ -85,7 +91,7 @@ class Validation extends Message{
     @return {number}      : Number converted into minute
     */
     checkEndTime(time){
-        if(!this.timeValidation(time))return false;
+        if(!this.timeValidation(time))return 0;
         let intTime = this.calc.time2Int(time);
         // Only when required 24 hours time schedule
         if(this.data['startTime'] === this.data['endTime']){
@@ -105,20 +111,25 @@ class Validation extends Message{
     @return {number} num     : Unit to create Time Table(Minute)
     */
     checkDivTime(divTime){
-        if(!this.divTimeValidation(divTime))return false;
+        if(!this.divTimeValidation(divTime))return 0;
         const intDivTime = parseInt(divTime,10);
         this.DIV_TIME = intDivTime;
         return intDivTime;
     }
-    checkShiftTime(a){
-
-        return a;
+    /*
+    Validation of Shift
+    @param  {obj} shift : shift object ({"name1":"12:00-18:00",...})
+    @return {obj} shift : Unit to create Time Table(Minute)
+    */
+    checkShiftTime(shift){
+        if(!this.shiftValidation(shift)    )return null;
+        return shift;
     }
     /*
     Check format of time
     @param  {string}   time : Time (HH:MM)
     @return {boolean} true  : No Error.
-                      false : Has Error.
+    false : Has Error.
     */
     timeValidation(time){
         // flag to detect error(true: No error, false: Has error)
@@ -150,7 +161,7 @@ class Validation extends Message{
     Check format of divTime
     @param  {string} divTime : Unit to create Time Table(Minute)
     @return {boolean} true  : No Error.
-                      false : Has Error.
+    false : Has Error.
     */
     divTimeValidation(divTime){
         let flg = true;
@@ -168,6 +179,94 @@ class Validation extends Message{
         }
         return flg;
     }
+    /*
+    Check JSON structure of shift
+    @param  {obj}   shift   : Json format
+    @return {boolean} true  : No Error.
+    false : Has Error.
+    */
+    shiftValidation(shift){
+        // flag to detect error(true: No error, false: Has error)
+        let flg = true;
+        // Declare here to display errored message in catch(e)
+        let shiftColor = '';
+        let shiftTime = '';
+        try{
+            // Check value in Jason
+            // Access to Object rooted to Index Key
+            for(let key in shift){
+                let indexObj = shift[key];
+                // Access to Object rooted to Name Key
+                for(let name in indexObj){
+                    let nameObj = indexObj[name];
+                    // Access to Object rooted to Color Key
+                    for(let color in nameObj){
+                        // To display console
+                        shiftColor = color;
+                        shiftTime  = nameObj[color];
+                        if(!this.shiftColorKeyValidation(shiftColor))throw new Error();
+                        if(!this.shiftTimeValidation(shiftTime))     throw new Error();
+                    }
+                }
+            }
+        }catch(e){
+            console.error(e + ' => ' + shiftColor + ':' + shiftTime);
+            flg = false;
+        }
+        return flg;
+    }
+    /*
+    Check JSON structure of color key in shift
+    @param  {string}   color: Shoud be Number as String ("2")
+    @return {boolean} true  : No Error.
+    false : Has Error.
+    */
+    shiftColorKeyValidation(color){
+        // flag to detect error(true: No error, false: Has error)
+        let flg = true;
+        // Declare here to display errored message in catch(e)
+        try{
+            // Data type check
+            if(typeof(color) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+            // Lack or too much length
+            if(color.length !== 1)throw new Error(this.ermsg['SHIFT_COLOR_LENGTH']);
+            // Check whether hour and minute are number
+            if(isNaN(color))throw new Error(this.ermsg['NOT_NUMBER']);
+            // Check range
+            const INTCOLOR = parseInt(color,10);
+            if(!(INTCOLOR > 0 && INTCOLOR <= 9)) throw new Error(this.ermsg['SHIFT_COLOR_RANGE']);
+        }catch(e){
+            console.error(e + ' => ' + color);
+            flg = false;
+        }
+        return flg;
+    }
+    /*
+    Check format of shift
+    @param  {string}  shift : Time (HH:MM-HH:MM)
+    @return {boolean} true  : No Error.
+    false : Has Error.
+    */
+    shiftTimeValidation(shift){
+        // flag to detect error(true: No error, false: Has error)
+        let flg = true;
+        try{
+            // Data type check
+            if(typeof(shift) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+            // Lack or too much length
+            if(shift.length !== 11)throw new Error(this.ermsg['SHIFT_LENGTH']);
+            // Delimiter check
+            if(shift.substring(5,6) !== '-')throw new Error(this.ermsg['SHIFT_DELIMETER']);
+            // Check beginning & ending time format
+            if(!this.timeValidation(shift.substring(0,5))) throw new Error(this.ermsg['SHIFT_TIME']);
+            if(!this.timeValidation(shift.substring(6,11)))throw new Error(this.ermsg['SHIFT_TIME']);
+        }catch(e){
+            console.error(e + ' => ' + shift);
+            flg = false;
+        }
+        return flg;
+    }
+
 }
 
 // Class for calculation
