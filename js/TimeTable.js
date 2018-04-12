@@ -1,32 +1,49 @@
 'use strict'
 // Main class for TimeTable.js
 class TimeTable{
-    constructor(data,option={}){
+    constructor(data){
         this.v = new Validation(data);
+        // End if necessary parameter was missing
+        if(!this.v.checkExistance())return false;
         this.startTime  = data['startTime']; // Beginning Time
         this.endTime    = data['endTime'];   // Endint Time
         this.divTime    = data['divTime'];   // Unit to Divide time(minutes)
-        this.shift      = data['shift'];     // Time Table Data
-        //this.setOptions = this.setOptions(option); // Other option
-        console.log(this.startTime,this.endTime,this.divTime,this.shift);
+        this.shiftTime  = data['shift'];     // Time Table Data
+        this.option     = data['option'];     // Other option
+        // For final check of values
+        let arr = [
+            this.startTime,
+            this.endTime,
+            this.divTime,
+            this.shiftTime,
+            this.option
+        ];
+        // End if there was error in any parameter
+        if(!this.v.checkUndefinedArray(arr))return false;
+        //debug
+        //console.log(this.startTime,this.endTime,this.divTime,this.shiftTime,this.option);
     }
     get startTime() {return this.START_TIME}
-    set startTime(x){if(this.v.checkStartTime(x))this.START_TIME = this.v.checkStartTime(x)}
-    get endTime  (){return this.END_TIME  }
-    set endTime  (x){if(this.v.checkEndTime(x))  this.END_TIME   = this.v.checkEndTime(x)  }
-    get divTime  (){return this.DIV_TIME  }
-    set divTime  (x){if(this.v.checkDivTime(x))  this.DIV_TIME   = this.v.checkDivTime(x)  }
-    get shiftTime(){return this.SHIFT     }
-    set shiftTime(x){this.SHIFT      = this.v.checkShiftTime(x)}
-
+    set startTime(x){if(this.v.checkStartTime(x)) this.START_TIME = this.v.checkStartTime(x)}
+    get endTime  () {return this.END_TIME  }
+    set endTime  (x){if(this.v.checkEndTime  (x)) this.END_TIME   = this.v.checkEndTime(x)  }
+    get divTime  () {return this.DIV_TIME  }
+    set divTime  (x){if(this.v.checkDivTime  (x)) this.DIV_TIME   = this.v.checkDivTime(x)  }
+    get shiftTime() {return this.SHIFT     }
+    set shiftTime(x){if(this.v.checkShiftTime(x)) this.SHIFT      = this.v.checkShiftTime(x)}
+    get option   () {return this.OPTION    }
+    set option   (x){if(this.v.checkOption   (x)) this.OPTION     = this.v.checkOption(x)   }
+    get selector () {return this.SELECTOR  }
+    set selector (x){this.SELECTOR = x;    }
     /*
-    Set option of this library
-    @param  obj : option objects simply user enters
-    @return obj : option objects defult value users's option included
+    To generate TimeTable where class name is "TimeTable"
+    @param  {selector} id : Selector has to be ID
+    @return {boolean}  true  : No Error.
+    false : Has Error.
     */
-    setOptions(obj){
-        // Initial value of options
-
+    init(sel){
+        this.selector = sel;
+        $(sel).append(sel);
     }
 }
 
@@ -56,6 +73,12 @@ class Message{
         // About Data Type
         this.ermsg['STRING_DATA_TYPE']  = "[DATA] HAS TO BE STRING";
         this.ermsg['NOT_NUMBER']        = "[DATA] HAS TO BE NUMBER";
+        this.ermsg['NOT_BOOLEAN']       = "[DATA] HAS TO BE TRUE OR FALSE";
+        this.ermsg['NOT_COLOR_CODE']    = "[DATA] COLOR CODE HAS TO BE # AND 1-9";
+        // Existance Error
+        this.ermsg['NO_STARTTIME']      = "[NO_DATE] startTime WAS NOT SET TO PARAMETER";
+        this.ermsg['NO_ENDTIME']        = "[NO_DATE] endTime WAS NOT SET TO PARAMETER";
+        this.ermsg['NO_DIVTIME']        = "[NO_DATE] divTime WAS NOT SET TO PARAMETER";
     }
 }
 
@@ -68,6 +91,27 @@ class Validation extends Message{
         this.START_TIME = 0;
         this.END_TIME   = 0;
         this.DIV_TIME   = 0;
+    }
+    /*
+    Check Data Existance
+    @return {boolean} true  : No Error.
+    false : Has Error.
+    */
+    checkExistance(){
+        // flag to detect error(true: No error, false: Has error)
+        let flg = true;
+        try{
+            // Check existance of startTime
+            if(this.data['startTime'] == null)throw new Error(this.ermsg['NO_STARTTIME']);
+            // Check existance of endTime
+            if(this.data['endTime'] == null)  throw new Error(this.ermsg['NO_ENDTIME']);
+            // Check existance of endTime
+            if(this.data['divTime'] == null)  throw new Error(this.ermsg['NO_DIVTIME']);
+        }catch(e){
+            console.error(e);
+            flg = false;
+        }
+        return flg;
     }
     /*
     Check starting time
@@ -124,6 +168,39 @@ class Validation extends Message{
     checkShiftTime(shift){
         if(!this.shiftValidation(shift)    )return null;
         return shift;
+    }
+    /*
+    Check Option
+    @param  {obj} option : Option of instance parameter
+    @return {obj} option : Add Default Value if there is no key
+    */
+    checkOption(option){
+        // Set default value if there is no workTime option
+        if(!option['workTime'])option['workTime']   = false;
+        // Set default value if there is no bgcolor option
+        if(!option['bgcolor'])option['bgcolor']     = '#FFF';
+        // Set default value if there is no bgcolor option
+        if(!option['selectBox'])option['selectBox'] = null;
+        // Check each values;
+        if(!this.optionValidation(option)    )return null;
+        return option;
+    }
+    /*
+    Check undefined in object
+    @param  {array} arr     : All constructor in instance of class TimeTable.
+    @return {boolean} true  : No Error.
+    false : Has Error.
+    */
+    checkUndefinedArray(arr){
+        let flg = true;
+        const LEN = arr.length;
+            for(let i = 0; i < LEN; i++){
+                if(!arr[i]){
+                    flg = false;
+                    break;
+                }
+            }
+        return flg;
     }
     /*
     Check format of time
@@ -266,7 +343,46 @@ class Validation extends Message{
         }
         return flg;
     }
+    /*
+    Check Option
+    @param  {obj}  option : option of instance parameter
+    @return {boolean} true  : No Error.
+    false : Has Error.
+    */
+    optionValidation(option){
+        // flag to detect error(true: No error, false: Has error)
+        let flg = true;
+        // This variable will be reused in order to display in error messsage
+        let target;
+        try{
+            // Check workTime
+            target = option['workTime'];
+            if(typeof(target) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+            if(!(target.toUpperCase() === 'TRUE' || target.toUpperCase() === 'FALSE')){
+                throw new Error(this.ermsg['NOT_BOOLEAN']);
+            }
+            // Check bgColor
+            target = option['bgcolor'];
+            if(typeof(target) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+            // Color code reg
+            var regex = new RegExp(/^#([\da-fA-F]{6}|[\da-fA-F]{3})$/);
+            if(!regex.test(target))throw new Error(this.ermsg['NOT_COLOR_CODE']);
 
+            // Check selectBox
+            const obj = option['selectBox']
+            // Access to Key & Value
+            for(let key in obj){
+                target = key;
+                if(typeof(target) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+                target = obj[key];
+                if(typeof(target) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+            }
+        }catch(e){
+            console.error(e + ' => ' + target);
+            flg = false;
+        }
+        return flg;
+    }
 }
 
 // Class for calculation

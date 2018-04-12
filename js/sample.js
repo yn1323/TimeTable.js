@@ -15,7 +15,7 @@ $(() => {
         },
         "500" : {
             'C': {
-                "1" : "11:00-12:45"
+                "1" : "15:00-18:30"
             }
         }
     }
@@ -30,13 +30,17 @@ $(() => {
         shift: shiftObj,
         // Other options
         option: {
-            worktime: true,
-            bgcolor: '#abc'
+            workTime: 'true',
+            bgcolor: '#abc',
+            // {index :  name, : index: name,,..}
+            selectBox: {
+                "1" : "A",
+                "3" : "Mr.Jason",
+                "25" : "Mrs.Jason"
+            }
         }};
 
         // Call Time Table
         var instance = new TimeTable(obj);
-        let shift = {};
-        //var a = new Validation(obj);
-        //console.log(a.shiftValidation(shiftObj));
+        instance.init('#TimeTable');
     });
