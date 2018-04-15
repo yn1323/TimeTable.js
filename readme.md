@@ -2,10 +2,13 @@
 ![NOTE_ICON](img/note.png)
 ## About
 JavaScript (ES6) library for creating time table.
+jQuery 1.9 + is required.
 
 ## How to Use
-   1. Load TimeTable.js in html.
+   1. Load TimeTable.js, TimeTable.css, and jQuery in html.
       ```html
+      <link rel="stylesheet" href="./TimeTable.css"/>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jQuery.min.js"></script>
       <script src="./TimeTable.js"></script>
       ```
    1. Add division and class where you want to create Time Table.
@@ -16,20 +19,34 @@ JavaScript (ES6) library for creating time table.
       ```js
       var test = new TimeTable({
           // Beginning Time
-          startTime: '10:00',
+          startTime: "10:00",
           // Ending Time
-          endTime: '23:00',
+          endTime: "23:00",
           // Time to divide(minute)
-          divTime: '15',
+          divTime: "15",
           // Time Table
           shift: {
-              'Sir Isaac Newton': '10:00-23:00',
-              'Galileo Galilei' : '11:00-12:45'
+              "1" : {
+                "Sir Isaac Newton": {
+                    "1" : "10:00-12:00",
+                    "2" : "13:00-14:00"
+                }
+              },
+              "2" : {
+                  "Galileo Galilei": {
+                      "3" : "11:00-12:45"
+                  }
+              }
           },
           // Other options
           option: {
-              worktime: true,
-              bgcolor: '#abc'
+              worktime: "true",
+              bgcolor: "#abc",
+              selectBox: {
+                  "1": "Sir Isaac Newton",
+                  "2": "Galileo Galilei",
+                  "3": "Mr.Smith"
+              }
           }
       });
       ```
