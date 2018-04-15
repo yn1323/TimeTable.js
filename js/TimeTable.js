@@ -2,7 +2,10 @@
 // Main class for TimeTable.js
 class TimeTable{
     constructor(data){
+        // Flag for when this instance got error
+        this.errFlg = true;
         this.v = new Validation(data);
+        this.c = new Calculation();
         // End if necessary parameter was missing
         if(!this.v.checkExistance())return false;
         this.startTime  = data['startTime']; // Beginning Time
@@ -19,9 +22,11 @@ class TimeTable{
             this.option
         ];
         // End if there was error in any parameter
-        if(!this.v.checkUndefinedArray(arr))return false;
-        //debug
-        //console.log(this.startTime,this.endTime,this.divTime,this.shiftTime,this.option);
+        if(!this.v.checkUndefinedArray(arr)){
+            // Error Flag for when this NEW has been failed.
+            this.errFlg = false;
+            return false
+        };
     }
     get startTime() {return this.START_TIME}
     set startTime(x){if(this.v.checkStartTime(x)) this.START_TIME = this.v.checkStartTime(x)}
@@ -42,8 +47,99 @@ class TimeTable{
     false : Has Error.
     */
     init(sel){
+        // Not to proceed process when there was error
+        if(!this.errFlg)return false;
+        // Set as Constructor
         this.selector = sel;
-        $(sel).append(sel);
+        // Set Table
+        let table = this.createTable();
+        // Set Time to table
+        // this.appendTime();
+        this.debug(table);
+        //console.log($(sel).offset());
+        //$(sel).append(base);
+    }
+    /*
+    Create Table for append document.
+    @return {dom} base : Table dome
+    */
+    createTable(){
+        let base = $("<table>",{class: "TimeTable",id: "TimeTable"});
+        // Create Header
+        base = this.createTableHeader(base);
+        // Create Data
+        base = this.createTableData(base);
+        // Set 1st column(name)
+        base = this.addFirstColumn(base);
+        return base;
+    }
+    /*
+    Create Table header for append document.
+    @param   {dom} base : Only Table tag is included
+    @reaturm {dom} base : Table tag and header tags are included
+    */
+    createTableHeader(base){
+        let tr = $("<tr></tr>", {class: "theader", id: "theader"});
+        // Always Header will be --:00.
+        let colspan = 60 / this.divTime;
+        // Column of Time(Name column is not included)
+        const COLUMNS = this.c.countColumns(this.startTime, this.endTime, this.divTime);
+        let startTime = this.startTime;
+        // Create Table Header
+        for(let i = 0; i < COLUMNS; i++){
+            // Convert time
+            let thTime = this.c.int2Time(startTime + i * this.divTime);
+            // Skip if time is NOT --:00
+            if((startTime + i * this.divTime) % 60 != 0){continue;}
+            tr.append($(`<th colspan = ${colspan}>${thTime}</th>`));
+        }
+        base = base.append(tr);
+        return base;
+    }
+    /*
+    Create Table header for append document.
+    @param {dom} base : Table tag include header
+    @return {dom} base : Table tag include header and data
+    */
+    createTableData(base){
+        const COLUMNS = this.c.countColumns(this.startTime, this.endTime, this.divTime);
+        const NUMSHIFT = this.c.getNames(this.shiftTime).length;
+        // Loop for number of shift(rows)
+        for(let i = 0; i < NUMSHIFT; i++){
+            // Loop for time cells(columns)
+            let tr = $("<tr></tr>", {class: `js-tdata`});
+            for(let j = 0; j < COLUMNS; j++){
+                tr.append($(`<td>${j}</td>`));
+            }
+            base = base.append(tr);
+        }
+        return base;
+    }
+    /*
+    Add First Column
+    @param {dom} base : Table tag include header and data
+    @return {dom} base : Table tag include name column
+    */
+    addFirstColumn(base){
+        const NAMES = this.c.getNames(this.shiftTime);
+        // Column of Header
+        base.find("#theader").prepend('<th>NAME</th>');
+        // Column of Data
+        let td = base.find(".js-tdata");
+        for(let i = 0; i < NAMES.length; i ++){
+            $(td[i]).prepend(`<td>${NAMES[i]}</td>`);
+        }
+        return base;
+    }
+    /*
+    Function to append time bar to created table
+    @param {dom} base : Table DOM
+    */
+    appendTime(base){
+        
+    }
+    debug(str){
+        $("#debug").append(str);
     }
 }
 
@@ -64,6 +160,7 @@ class Message{
         this.ermsg['TIME_HOUR_RANGE']    = "[TIME] HOUR HAS TO BE BETWEEN 00 to 23";
         this.ermsg['TIME_MINUTE_RANGE']  = "[TIME] MINUTS HAS TO BE BETWEEN 00 to 59";
         this.ermsg['DIVTIME_RANGE']      = "[TIME] DIV TIME HAS TO BE BETWEEN 1 to 60";
+        this.ermsg['DIVTIME_RANGE2']     = "[TIME] divTime HAS TO BE  1,2,3,5,6,10,12,15,20,30, or 60";
         // About Shift
         this.ermsg['SHIFT_LENGTH']       = "[SHIFT] TIME LENGTH IS NOT 11. FORMAT HAS TO BE 'HH:MM-HH:MM'";
         this.ermsg['SHIFT_DELIMETER']    = "[SHIFT] DELIMETER SHOULD BE '-' IN 6TH CHARACTER";
@@ -250,6 +347,8 @@ class Validation extends Message{
             // Check Range of minute
             const intDivTime = parseInt(divTime,10);
             if(!(intDivTime > 0 && intDivTime <= 60))throw new Error(this.ermsg['DIVTIME_RANGE']);
+            // divTime should be 1,2,3,5,6,10,12,15,20,30,60
+            if(60 % divTime != 0)throw new Error(this.ermsg['DIVTIME_RANGE2']);
         }catch(e){
             console.error(e + ' => ' + divTime);
             flg = false;
@@ -447,5 +546,34 @@ class Calculation{
             num = "0" + num;
         }
         return num;
+    }
+    /*
+    Count cells
+    @param  {int} s   : startTime in parameter
+            {int} e   : endTime in parameter
+            {int} d   : divTime in parameter
+    @return {int} columns   : columns of Table
+    */
+    countColumns(s,e,d){
+        const columns = (e - s) / d;
+        return columns
+    }
+    /*
+    Get names in shift object
+    @param  {obj}   shift : shift object
+    @return {array} names : Array of names
+    */
+    getNames(shift){
+        let names = [];
+        // Access to Object rooted to Index Key
+        for(let key in shift){
+            let indexObj = shift[key];
+            // Access to Object rooted to Name Key
+            for(let name in indexObj){
+                let nameObj = name;
+                names.push(nameObj);
+            }
+        }
+        return names;
     }
 }
