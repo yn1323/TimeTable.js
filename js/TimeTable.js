@@ -40,6 +40,8 @@ class TimeTable{
     set option   (x){if(this.v.checkOption   (x)) this.OPTION     = this.v.checkOption(x)   }
     get selector () {return this.SELECTOR  }
     set selector (x){this.SELECTOR = x;    }
+    get coordinate () {return this.COORDINATE  }
+    set coordinate (x){this.COORDINATE = x;    }
     /*
     To generate TimeTable where class name is "TimeTable"
     @param  {selector} id : Selector has to be ID
@@ -53,9 +55,13 @@ class TimeTable{
         this.selector = sel;
         // Set Table
         let table = this.createTable();
+        // Set Coordinate for plotting bar
+        this.debug(table);
+
+        this.setCoordinate(table);
         // Set Time to table
         // this.appendTime();
-        this.debug(table);
+
         //console.log($(sel).offset());
         //$(sel).append(base);
     }
@@ -107,11 +113,16 @@ class TimeTable{
         // Loop for number of shift(rows)
         for(let i = 0; i < NUMSHIFT; i++){
             // Loop for time cells(columns)
-            let tr = $("<tr></tr>", {class: `js-tdata`});
+            let tr = $("<tr></tr>", {id: `name-${i}`});
             for(let j = 0; j < COLUMNS; j++){
-                tr.append($(`<td>${j}</td>`));
+                let timeAttr =  this.startTime + this.divTime * j;
+                let td = $(`<td>${j}</td>`);
+                // Set id for getting coordinate
+                td.attr('id', `${i}-${j}`);
+                td.attr('time', timeAttr);
+                tr.append(td);
             }
-            base = base.append(tr);
+            base.append(tr);
         }
         return base;
     }
@@ -125,18 +136,36 @@ class TimeTable{
         // Column of Header
         base.find("#theader").prepend('<th>NAME</th>');
         // Column of Data
-        let td = base.find(".js-tdata");
         for(let i = 0; i < NAMES.length; i ++){
-            $(td[i]).prepend(`<td>${NAMES[i]}</td>`);
+            let td = base.find(`#name-${i}`);
+            $(td).prepend(`<td>${NAMES[i]}</td>`);
         }
         return base;
+    }
+    /*
+    Function to set coordinate to
+    @param {dom} table : Table DOM
+    */
+    setCoordinate(table){
+        const COLUMNS = this.c.countColumns(this.startTime, this.endTime, this.divTime);
+        const ROWS   = this.c.getNames(this.shiftTime).length;
+        let coordinate = {};
+        for(let i = 0; i < ROWS; i++){
+            for(let j = 0; j < COLUMNS; j++){
+                // Create ID
+                let tdIndex = `${i}-${j}`
+                let tdCoordinate = $(`#${tdIndex}`).offset();
+                coordinate[tdIndex] = tdCoordinate;
+            }
+        }
+        this.coordinate = coordinate;
     }
     /*
     Function to append time bar to created table
     @param {dom} base : Table DOM
     */
     appendTime(base){
-        
+        return;
     }
     debug(str){
         $("#debug").append(str);
