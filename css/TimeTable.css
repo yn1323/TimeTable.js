@@ -1,64 +1,67 @@
 .TimeTable {
-  width: auto;
-  border-spacing: 0;
-  font-size: 14px; }
+    width: auto;
+    border-spacing: 0;
+    font-size: 14px;
+}
 
 .TimeTable th {
-  color: #fff;
-  padding: 8px 15px;
-  background: #258;
-  background: -moz-linear-gradient(rgba(34, 85, 136, 0.7), rgba(34, 85, 136, 0.9) 50%);
-  background: -webkit-gradient(linear, 100% 0%, 100% 50%, from(rgba(34, 85, 136, 0.7)), to(rgba(34, 85, 136, 0.9)));
-  font-weight: bold;
-  border-left: 1px solid #258;
-  border-top: 1px solid #258;
-  border-bottom: 1px solid #258;
-  line-height: 120%;
-  text-align: center;
-  text-shadow: 0 -1px 0 rgba(34, 85, 136, 0.9);
-  box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.3) inset; }
+    color: #fff;
+    padding: 8px 15px;
+    background: #258;
+    background: -moz-linear-gradient(rgba(34, 85, 136, 0.7), rgba(34, 85, 136, 0.9) 50%);
+    background: -webkit-gradient(linear, 100% 0%, 100% 50%, from(rgba(34, 85, 136, 0.7)), to(rgba(34, 85, 136, 0.9)));
+    font-weight: bold;
+    border-left: 1px solid #258;
+    border-top: 1px solid #258;
+    border-bottom: 1px solid #258;
+    line-height: 120%;
+    text-align: center;
+    text-shadow: 0 -1px 0 rgba(34, 85, 136, 0.9);
+    box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.3) inset;
+}
 
 .TimeTable th:first-child {
-  border-radius: 5px 0 0 0; }
+    border-radius: 5px 0 0 0;
+}
 
 .TimeTable th:last-child {
-  border-radius: 0 5px 0 0;
-  border-right: 1px solid #258;
-  box-shadow: 2px 2px 1px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(255, 255, 255, 0.3) inset; }
+    border-radius: 0 5px 0 0;
+    border-right: 1px solid #258;
+    box-shadow: 2px 2px 1px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(255, 255, 255, 0.3) inset;
+}
 
 .TimeTable tr td {
-  padding: 8px 15px;
-  border-bottom: 1px solid #84b2e0;
-  border-left: 1px solid #84b2e0;
-  text-align: center; }
+    padding: 8px 15px;
+    border-bottom: 1px solid #84b2e0;
+    border-left: 1px solid #84b2e0;
+    text-align: center;
+}
 
 .TimeTable tr td:last-child {
-  border-right: 1px solid #84b2e0;
-  box-shadow: 2px 2px 1px rgba(0, 0, 0, 0.1); }
+    border-right: 1px solid #84b2e0;
+    box-shadow: 2px 2px 1px rgba(0, 0, 0, 0.1);
+}
 
 .TimeTable tr {
-  background: #fff; }
+    background: #fff;
+}
 
 .TimeTable tr:nth-child(2n+1) {
-  background: #f1f6fc; }
+    background: #f1f6fc;
+}
 
 .TimeTable tr:last-child td {
-  box-shadow: 2px 2px 1px rgba(0, 0, 0, 0.1); }
+    box-shadow: 2px 2px 1px rgba(0, 0, 0, 0.1);
+}
 
 .TimeTable tr:last-child td:first-child {
-  border-radius: 0 0 0 5px; }
+    border-radius: 0 0 0 5px;
+}
 
 .TimeTable tr:last-child td:last-child {
-  border-radius: 0 0 5px 0; }
+    border-radius: 0 0 5px 0;
+}
 
 .TimeTable tr:hover {
-  background: #bbd4ee; }
-
-.square {
-  width: 750px;
-  height: 1px;
-  background: #ff00ff;
-  position: absolute;
-  top: 715px;
-  margin-top: auto;
-  margin-bottom: auto; }
+    background: #bbd4ee;
+}

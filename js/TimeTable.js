@@ -6,6 +6,7 @@ class TimeTable{
         this.errFlg = true;
         this.v = new Validation(data);
         this.c = new Calculation();
+        this.u = new Utils();
         // End if necessary parameter was missing
         if(!this.v.checkExistance())return false;
         this.startTime  = data['startTime']; // Beginning Time
@@ -42,6 +43,8 @@ class TimeTable{
     set selector (x){this.SELECTOR = x;    }
     get coordinate () {return this.COORDINATE  }
     set coordinate (x){this.COORDINATE = x;    }
+    get table () {return this.TABLE  }
+    set table (x){this.TABLE = x;    }
     /*
     To generate TimeTable where class name is "TimeTable"
     @param  {selector} id : Selector has to be ID
@@ -54,20 +57,15 @@ class TimeTable{
         // Set as Constructor
         this.selector = sel;
         // Set Table
-        let table = this.createTable();
+        this.createTable();
         // Set Coordinate for plotting bar
-        this.debug(table);
-
-        this.setCoordinate(table);
+        this.debug(this.table);
+        this.setCoordinate();
         // Set Time to table
-        // this.appendTime();
-
-        //console.log($(sel).offset());
-        //$(sel).append(base);
+        this.appendTime();
     }
     /*
     Create Table for append document.
-    @return {dom} base : Table dome
     */
     createTable(){
         let base = $("<table>",{class: "TimeTable",id: "TimeTable"});
@@ -77,7 +75,10 @@ class TimeTable{
         base = this.createTableData(base);
         // Set 1st column(name)
         base = this.addFirstColumn(base);
-        return base;
+        // Set canvas in table tag
+        //let canvas = $("<canvas>",{class: "barCanvas", id: "barCanvas"});
+        //base.prepend(canvas);
+        this.table = base;
     }
     /*
     Create Table header for append document.
@@ -110,13 +111,15 @@ class TimeTable{
     createTableData(base){
         const COLUMNS = this.c.countColumns(this.startTime, this.endTime, this.divTime);
         const NUMSHIFT = this.c.getNames(this.shiftTime).length;
+        // Add as id
+        const INDEX = this.c.getIndex(this.shiftTime);
         // Loop for number of shift(rows)
         for(let i = 0; i < NUMSHIFT; i++){
             // Loop for time cells(columns)
-            let tr = $("<tr></tr>", {id: `name-${i}`});
+            let tr = $("<tr></tr>", {id: `name-${INDEX[i]}`});
             for(let j = 0; j < COLUMNS; j++){
                 let timeAttr =  this.startTime + this.divTime * j;
-                let td = $(`<td>${j}</td>`);
+                let td = $(`<td></td>`);
                 // Set id for getting coordinate
                 td.attr('id', `${i}-${j}`);
                 td.attr('time', timeAttr);
@@ -133,20 +136,22 @@ class TimeTable{
     */
     addFirstColumn(base){
         const NAMES = this.c.getNames(this.shiftTime);
+        // id for find
+        const INDEX = this.c.getIndex(this.shiftTime);
         // Column of Header
         base.find("#theader").prepend('<th>NAME</th>');
         // Column of Data
         for(let i = 0; i < NAMES.length; i ++){
-            let td = base.find(`#name-${i}`);
+            let td = base.find(`#name-${INDEX[i]}`);
             $(td).prepend(`<td>${NAMES[i]}</td>`);
         }
         return base;
     }
     /*
-    Function to set coordinate to
-    @param {dom} table : Table DOM
+    Function to set coordinate of each td
     */
-    setCoordinate(table){
+    setCoordinate(){
+        let table = this.table;
         const COLUMNS = this.c.countColumns(this.startTime, this.endTime, this.divTime);
         const ROWS   = this.c.getNames(this.shiftTime).length;
         let coordinate = {};
@@ -162,9 +167,24 @@ class TimeTable{
     }
     /*
     Function to append time bar to created table
-    @param {dom} base : Table DOM
     */
-    appendTime(base){
+    appendTime(){
+        const canvas = new Canvas();
+        let timeData = this.c.getIndexAndTime(this.shiftTime);
+        let gen = this.u.colorTimeGenerator(timeData);
+        for(;;){
+            // Analyze object
+            let [index,color,s,e] = gen.next().value;
+            // End of generator
+            if(!index)break;
+            // Get id of dom which will plot start time and end time
+            let [sId,eId] = this.u.searchNearestDom(index,s,e);
+            // Draw Line
+            canvas.drawLine(sId,eId,color);
+            console.log(this.coordinate);
+            // temp
+            //break;
+        }
         return;
     }
     debug(str){
@@ -320,12 +340,12 @@ class Validation extends Message{
     checkUndefinedArray(arr){
         let flg = true;
         const LEN = arr.length;
-            for(let i = 0; i < LEN; i++){
-                if(!arr[i]){
-                    flg = false;
-                    break;
-                }
+        for(let i = 0; i < LEN; i++){
+            if(!arr[i]){
+                flg = false;
+                break;
             }
+        }
         return flg;
     }
     /*
@@ -405,12 +425,14 @@ class Validation extends Message{
                 for(let name in indexObj){
                     let nameObj = indexObj[name];
                     // Access to Object rooted to Color Key
-                    for(let color in nameObj){
-                        // To display console
-                        shiftColor = color;
-                        shiftTime  = nameObj[color];
-                        if(!this.shiftColorKeyValidation(shiftColor))throw new Error();
-                        if(!this.shiftTimeValidation(shiftTime))     throw new Error();
+                    for(let i in nameObj){
+                        let obj = nameObj[i];
+                        // To fetch as String, made another loop
+                        for(let color in obj){
+                            let time = obj[color];
+                            if(!this.shiftColorKeyValidation(color))throw new Error();
+                            if(!this.shiftTimeValidation(time))     throw new Error();
+                        }
                     }
                 }
             }
@@ -525,9 +547,9 @@ class Calculation{
     */
     twoTime2Int(time){
         // Starting Time
-        let sTime = this.time2Int(time.substring(0,4));
+        let sTime = this.time2Int(time.substring(0,5));
         // Ending Time
-        let eTime = this.time2Int(time.substring(6,10));
+        let eTime = this.time2Int(time.substring(6,11));
         // Process for Ending Time exceeds 00:00
         if(sTime > eTime){
             // Minute of 24 hours * 60 minute
@@ -579,13 +601,21 @@ class Calculation{
     /*
     Count cells
     @param  {int} s   : startTime in parameter
-            {int} e   : endTime in parameter
-            {int} d   : divTime in parameter
+    {int} e   : endTime in parameter
+    {int} d   : divTime in parameter
     @return {int} columns   : columns of Table
     */
     countColumns(s,e,d){
         const columns = (e - s) / d;
         return columns
+    }
+    /*
+    Get index in shift object
+    @param  {obj}   shift : shift object
+    @return {array} index : Array of index
+    */
+    getIndex(shift){
+        return Object.keys(shift);
     }
     /*
     Get names in shift object
@@ -599,10 +629,260 @@ class Calculation{
             let indexObj = shift[key];
             // Access to Object rooted to Name Key
             for(let name in indexObj){
-                let nameObj = name;
-                names.push(nameObj);
+                let nameStr = name;
+                names.push(nameStr);
             }
         }
         return names;
+    }
+    /*
+    Get Index and Time
+    @param  {obj}  shift : shift object
+    @return {obj}  obj : {1:[{color:1,startTime:600,endTime:1200},{color:..}], 2:{...}}
+    */
+    getIndexAndTime(shift){
+        let obj = {};
+        // Access to Object rooted to Index Key
+        for(let key in shift){
+            let indexObj = shift[key];
+            // Access to Object rooted to Name Key
+            for(let name in indexObj){
+                let colorObj = indexObj[name];
+                // tempArray to store data of 1 person
+                let tempArray = [];
+                // Access to Object rooted to Color Key
+                for(let i in colorObj){
+                    let obj = colorObj[i];
+                    // To fetch as String, made another loop
+                    for(let color in obj){
+                        let tempObj = {};
+                        let [start,end] = this.twoTime2Int(obj[color]);
+                        tempObj["color"] = color;
+                        tempObj["startTime"] = start;
+                        tempObj["endTime"] = end;
+                        tempArray.push(tempObj);
+                    }
+                }
+                obj[`${key}`] = tempArray;
+            }
+        }
+        return obj;
+    }
+}
+
+class Utils{
+    /*
+    Generator to return color, startTime, endTime as variable
+    @param {obj} obj : color and time Object
+    @example :{1:[{color:1,startTime:600,endTime:1200},{color:..}], 2:{...}}
+    @return {int} index : index
+    {int} color : color
+    {int} s : startTime
+    {int} e : endTime
+    */
+    *colorTimeGenerator(obj){
+        let indexArray = Object.keys(obj);
+        while(true){
+            // Loop for index
+            for(let i = 0; i < indexArray.length; i++){
+                let colorTimeArray = obj[indexArray[i]];
+                // Loop for time in 1 person
+                for(let j = 0; j < colorTimeArray.length; j++){
+                    let colorTime = colorTimeArray[j];
+                    yield [
+                        indexArray[i],
+                        colorTime["color"],
+                        colorTime["startTime"],
+                        colorTime["endTime"]
+                    ];
+                }
+            }
+            yield [false,false,false,false];
+        }
+    }
+    /**
+    * searchNearestDom - description
+    *
+    * @param  {str} index : index number of shift
+    * @param  {int} s     : Start time of shift
+    * @param  {int} e     : End time of shift
+    * @return {str} startId: Nearest element id of start time;
+    * @return {str} endId: Nearest element id of end time;
+    */
+    searchNearestDom(index,s,e){
+        let [time,id] = this.getOneRowArrtibure(index);
+        // Stores nearest id
+        let startId = '';
+        let endId = '';
+        // Stores nearest time
+        let st=5000;
+        let et=5000;
+        for(let i in time){
+            let attrTime = parseInt(time[i],10);
+            if(Math.abs(attrTime - s) <= Math.abs(st - s)){
+                st = attrTime
+                startId = id[i];
+            }
+            if(Math.abs(attrTime - e) <= Math.abs(et - e)){
+                et = attrTime;
+                endId = id[i];
+            }
+        }
+        return [startId,endId];
+    }
+    /**
+    * To get Attribute of 1 row of Table
+    *
+    * @param  {str} index :Index number of shift
+    * @return {array} time : Array of Time Attribute
+    * @return {array} id   : Array of id Attribute
+    */
+    getOneRowArrtibure(index){
+        let time = [];
+        let id = [];
+        $(`#name-${index} td`).each((i,elem)=>{
+            // Skip Header Row
+            if(i){
+                let el = $(elem)
+                time.push(el.attr('time'));
+                id.push(el.attr('id'));
+            }
+        });
+        return [time,id];
+    }
+}
+
+class Canvas{
+    constructor(){
+        this.color = [
+            "#ff7f7f",
+            "#7f7fff",
+            "#7fff7f",
+            "#ffff7f",
+            "#818181",
+            "#bf7fff",
+            "#7fbfff",
+            "#bfff7f",
+            "#ffbf7f",
+        ];
+        // To store canvas tag beginning position and size
+        this.canvasTag = {};
+        // To store cell size
+        this.cell = {};
+        this.measureCellSize();
+        // Create canvas tag in clickable area
+        this.setCanvasTag();
+    }
+    /**
+    * Measure cell size and set to constructor
+    */
+    measureCellSize(){
+        let target = $('.TimeTable td:eq(1)');
+        this.cell.width = target.outerWidth();
+        this.cell.height = target.outerHeight();
+    }
+    /**
+    * setCanvasTag - Append to Dom and set to constructor
+    */
+    setCanvasTag(){
+        let firstCell = this.getCoordinate('.TimeTable td:eq(1)');
+        let lastCell  = this.getCoordinate('.TimeTable td:last');
+        let table     = this.getCoordinate('.TimeTable');
+        // Absolute coordinate & Add Tab tags coordinate
+        this.canvasTag.x = firstCell.x;
+        this.canvasTag.y = firstCell.y
+        // Add cell size
+        // +1 is padding of rightmost cell
+        this.canvasTag.width = lastCell.x - firstCell.x + this.cell.width + 1;
+        this.canvasTag.height = lastCell.y - firstCell.y + this.cell.height;
+        let canvas = $("<canvas>",{class:"TimeBar"});
+        canvas.css({
+            height: this.canvasTag.height,
+            width: this.canvasTag.width,
+            position: "absolute",
+            top: this.canvasTag.y,
+            left: this.canvasTag.x,
+        });
+        $('.TimeTable').prepend(canvas);
+    }
+    /**
+    * drawLine - To draw canvas line from sId to eId
+    *
+    * @param  {str} sId   : id to start draw line
+    * @param  {str} eId   : id to end drawing line
+    * @param  {str} color : decide color to use
+    * @return {boolearn}  :
+    */
+    drawLine(sId,eId,color){
+        // Coordinate of start and end
+        let sc = this.getCoordinate(`#${sId}`);
+        let ec  = this.getCoordinate(`#${eId}`);
+        // Convert to use for coordinate in canvas
+        sc = this.a2R(sc);
+        ec = this.a2R(ec);
+        // Set Y coordinate middle of cell
+        let middle = this.cell.height / 2;
+        sc.y += middle;
+        ec.y += middle;
+        // Init canvas
+        let canvas = $(".TimeBar").get(0);
+        var ctx = canvas.getContext("2d") ;
+        ctx.beginPath();
+        // Start
+        ctx.moveTo(sc.x, sc.y);
+        // End
+        ctx.lineTo(ec.x, ec.y);
+        // Color
+        ctx.strokeStyle = this.color[parseInt(color,10)];
+        // Line width
+        ctx.lineWidth = 10;
+        // Plot!!
+        ctx.stroke() ;
+    }
+
+
+    /**
+     * a2R - Convert absolut coordinate to relative coordiante(Use in Canvas)
+     *
+     * @param  {obj} coordinate : Must have format of {x: x, y: y}
+     * @return {obj} obj        : Converted object
+     */
+    a2R(coordinate){
+        let obj = {};
+        obj.x = coordinate.x - this.canvasTag.x;
+        obj.y = coordinate.y - this.canvasTag.y;
+        return obj;
+    }
+    /**
+    * getCoordinate - Get aboslute coordinate of Element
+    *
+    * @param  {dom} selector
+    * @return {obj} obj : Object contains coordinate of cell
+    */
+    getCoordinate(selector){
+        let obj = {};
+        let element = $(selector).get(0);
+        let rect = element.getBoundingClientRect();
+        obj.x = rect.left + window.pageXOffset;
+        obj.y = rect.top + window.pageYOffset
+        return obj;
+    }
+    debugDot(x,y){
+        let canvas = $("<canvas>",{id: "debugdot"});
+        canvas.css({
+            height: 20,
+            width: 20,
+            position: "absolute",
+            top: y,
+            left: x,
+        });
+        $('body').prepend(canvas);
+        let element = $("#debugdot").get(0);
+        var ctx = element.getContext("2d");
+        // パスをリセット
+        ctx.beginPath () ;
+        ctx.fillStyle = "red";
+        ctx.fillRect(x, y, 2, 2);
+        ctx.stroke();
     }
 }
