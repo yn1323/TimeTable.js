@@ -66,3 +66,8 @@
 .TimeTable tr:hover {
     background: #bbd4ee;
 }
+
+.timeTableSelectbox{
+    border: none;
+    background-color: inherit;
+}

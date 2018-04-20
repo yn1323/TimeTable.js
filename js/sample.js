@@ -74,15 +74,19 @@ $(() => {
         shift: shiftObj,
         // Other options
         option: {
-            workTime: "true",
+            // workTime include time not displaying
+            workTime: true,
             bgcolor: ["#00FFFF"],
             // {index :  name, : index: name,,..}
+            // selectBox index and shift index should be same
+            // Give randome if shift index was not in selectBox index
             selectBox: {
-                "1" : "A",
+                "2" : "Jason Paige",
                 "3" : "Mr.Jason",
                 "25" : "Mrs.Jason"
             }
-        }};
+        }
+    };
 
     // Call Time Table
     var instance = new TimeTable(obj);

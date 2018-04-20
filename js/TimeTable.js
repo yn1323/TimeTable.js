@@ -45,6 +45,8 @@ class TimeTable{    // eslint-disable-line no-unused-vars
     set coordinate (x){this.COORDINATE = x;    }
     get table () {return this.TABLE;  }
     set table (x){this.TABLE = x;    }
+    get selectbox () {return this.SELECTBOX;  }
+    set selectbox (x){this.SELECTBOX = x;    }
     /*
     To generate TimeTable where class name is "TimeTable"
     @param  {selector} id : Selector has to be ID
@@ -65,7 +67,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         this.appendTime();
 
         // Set options
-        this.setOption();
+        if(this.option["workTime"])this.setWorkTimeColumn();
     }
     /*
     Create Table for append document.
@@ -119,7 +121,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         // Loop for number of shift(rows)
         for(let i = 0; i < NUMSHIFT; i++){
             // Loop for time cells(columns)
-            let tr = $("<tr></tr>", {id: `name-${INDEX[i]}`});
+            let tr = $("<tr></tr>", {id: `name-${INDEX[i]}`, class: "js-tdata"});
             for(let j = 0; j < COLUMNS; j++){
                 let timeAttr =  this.startTime + this.divTime * j;
                 let td = $("<td></td>");
@@ -146,7 +148,17 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         // Column of Data
         for(let i = 0; i < NAMES.length; i ++){
             let td = base.find(`#name-${INDEX[i]}`);
-            $(td).prepend(`<td>${NAMES[i]}</td>`);
+            let element = "";
+            // Different whether select box option exist
+            if(this.option["selectBox"]){
+                // Required to create selecttag as string (Why?)
+                let select = this.createSelectBox(INDEX[i],NAMES[i]);
+                element = (`<td>${select}</td>`);
+                //console.log(toString(this.selectbox));
+            }else{
+                element = (`<td>${NAMES[i]}</td>`);
+            }
+            td.prepend($(element));
         }
         return base;
     }
@@ -190,10 +202,43 @@ class TimeTable{    // eslint-disable-line no-unused-vars
             canvas.drawLine(sId,eId,color,over);
         }
     }
-
-    setOption(){
-        // Set work time
-        //if()
+    /**
+     * setWorkTimeColumn - description
+     */
+    setWorkTimeColumn(){
+        $("#theader").append("<th>合計時間</th>");
+        $(".js-tdata").each((i,elem)=>{
+            let time = this.c.getTotalShiftTime($(elem).attr("id"),this.shiftTime);
+            $(elem).append(`<td>${time}</td>`);
+        });
+    }
+    /**
+     * createSelectBox -- Had to create as string to append select box
+     * Give randome if shift index was not in selectBox index
+     * TODO: Create Select box as dom
+     * @return {str}  select box tags;
+     */
+    createSelectBox(index,name){
+        let selectTag = "<select class=\"timeTableSelectbox\">";
+        let str = "";
+        let obj = this.option["selectBox"];
+        let matchFlg = false;
+        for(let i in obj){
+            if(i !== index){
+                str += `<option value="${i}">${obj[i]}</option>`;
+            }else{
+                // Even shift name and selectBox name did not match,
+                // set shift name
+                str += `<option value="${i}" selected>${name}</option>`;
+                matchFlg = true;
+            }
+        }
+        // Shift index did not match with selectBox index
+        if(!matchFlg){
+            str += `<option value="${index}" selected>${name}</option>`;
+        }
+        selectTag = selectTag + str + "</select>";
+        return selectTag;
     }
     debug(str){
         $("#debug").append(str);
@@ -227,7 +272,7 @@ class Message{
         // About Data Type
         this.ermsg["STRING_DATA_TYPE"]  = "[DATA] HAS TO BE STRING";
         this.ermsg["NOT_NUMBER"]        = "[DATA] HAS TO BE NUMBER";
-        this.ermsg["NOT_BOOLEAN"]       = "[DATA] HAS TO BE TRUE OR FALSE";
+        this.ermsg["NOT_BOOLEAN"]       = "[DATA] HAS TO BE TRUE OR FALSE OF BOOLEAN";
         this.ermsg["NOT_COLOR_CODE"]    = "[DATA] COLOR CODE HAS TO BE # AND 0-F IN 3 OR 6 DIGITS";
         // Existance Error
         this.ermsg["NO_STARTTIME"]      = "[NO_DATE] startTime WAS NOT SET TO PARAMETER";
@@ -328,7 +373,7 @@ class Validation extends Message{
     @param  {obj} option : Option of instance parameter
     @return {obj} option : Add Default Value if there is no key
     */
-    checkOption(option){
+    checkOption(option={}){
         // Set default value if there is no workTime option
         if(!option["workTime"])option["workTime"]   = false;
         // Set default value if there is no bgcolor option
@@ -513,10 +558,7 @@ class Validation extends Message{
         try{
             // Check workTime
             target = option["workTime"];
-            if(typeof(target) !== "string")throw new Error(this.ermsg["STRING_DATA_TYPE"]);
-            if(!(target.toUpperCase() === "TRUE" || target.toUpperCase() === "FALSE")){
-                throw new Error(this.ermsg["NOT_BOOLEAN"]);
-            }
+            if(typeof(target) !== "boolean")throw new Error(this.ermsg["NOT_BOOLEAN"]);
             // Check bgColor
             target = option["bgcolor"];
             for(let i in target){
@@ -526,8 +568,6 @@ class Validation extends Message{
                 var regex = new RegExp(/^#([\da-fA-F]{6}|[\da-fA-F]{3})$/);
                 if(!regex.test(color))throw new Error(this.ermsg["NOT_COLOR_CODE"]);
             }
-
-
             // Check selectBox
             const obj = option["selectBox"];
             // Access to Key & Value
@@ -678,6 +718,41 @@ class Calculation{
             }
         }
         return obj;
+    }
+    /**
+     * getTotalShiftTime
+     *
+     * @param  {str} id
+     * @param  {object} shift
+     * @return {str} time : Format will be HH:MM
+     */
+    getTotalShiftTime(id,shift){
+        let index = id.replace( "name-" , "" );
+        let timeArray = this.getShiftTimeFromIndex(index,shift);
+        let totalTime = 0;
+        for(let i = 0; i < timeArray.length; i++){
+            let [s,e] = this.twoTime2Int(timeArray[i]);
+            totalTime += (e - s);
+        }
+        return this.int2Time(totalTime);
+    }
+    /**
+     * getShiftTimeFromIndex
+     *
+     * @param  {str}   index
+     * @return {array} time  : Array of Shift Time
+     */
+    getShiftTimeFromIndex(index,shift){
+        let timeArray = [];
+        let names = shift[index];
+        for(let i in names){
+            let array = names[i];
+            for(let j in array){
+                // Convert Array to String
+                timeArray.push((Object.values(array[j]))[0]);
+            }
+        }
+        return timeArray;
     }
 }
 

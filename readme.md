@@ -2,13 +2,13 @@
 ![NOTE_ICON](img/note.png)
 ## About
 JavaScript (ES6) library for creating time table.
-jQuery 1.9 + is required.
+It worked jQuery 1.4.1+. 
 
 ## How to Use
    1. Load TimeTable.js, TimeTable.css, and jQuery in html.
       ```html
       <link rel="stylesheet" href="./TimeTable.css"/>
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jQuery.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
       <script src="./TimeTable.js"></script>
       ```
    1. Add division and class where you want to create Time Table.
@@ -57,4 +57,4 @@ jQuery 1.9 + is required.
 YN1323
 
 ### License
-TimeTable.js is licensed under MIT License.
+TimeTable.js is licensed under MIT
