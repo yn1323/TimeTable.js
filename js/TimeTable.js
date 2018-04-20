@@ -60,14 +60,14 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         this.selector = sel;
         // Set Table
         this.createTable();
+        // Set options
+        if(this.option["workTime"])this.setWorkTimeColumn();
         // Set Coordinate for plotting bar
         this.debug(this.table);
         //this.setCoordinate();
         // Set Time to table
         this.appendTime();
 
-        // Set options
-        if(this.option["workTime"])this.setWorkTimeColumn();
     }
     /*
     Create Table for append document.
@@ -183,7 +183,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
     Function to append time bar to created table
     */
     appendTime(){
-        const canvas = new Canvas(this.option.bgcolor);
+        const canvas = new Canvas(this.option.bgcolor,this.option["workTime"]);
         let timeData = this.c.getIndexAndTime(this.shiftTime);
         let gen = this.u.colorTimeGenerator(timeData);
         for(;;){
@@ -195,7 +195,10 @@ class TimeTable{    // eslint-disable-line no-unused-vars
             let [sId,eId] = this.u.searchNearestDom(index,s,e);
             // If there is no next element, the coordinate may be not proper.
             let over = false;
-            if(!$(`#${eId}`).next().length){
+            // Conditions to judge whether bar reaches to last cell
+            let conditionA = (this.option["workTime"] === false && $(`#${eId}`).next().length === 0);
+            let conditionB = (this.option["workTime"] === true && $(`#${eId}`).next().hasClass("workTime"));
+            if(conditionA || conditionB){
                 over = this.u.checkOver(e,eId);
             }
             // Draw Line
@@ -206,10 +209,12 @@ class TimeTable{    // eslint-disable-line no-unused-vars
      * setWorkTimeColumn - description
      */
     setWorkTimeColumn(){
-        $("#theader").append("<th>合計時間</th>");
-        $(".js-tdata").each((i,elem)=>{
+        let header = this.table.find("#theader");
+        header.append("<th>合計時間</th>");
+        let tbody = this.table.find(".js-tdata");
+        tbody.each((i,elem)=>{
             let time = this.c.getTotalShiftTime($(elem).attr("id"),this.shiftTime);
-            $(elem).append(`<td>${time}</td>`);
+            $(elem).append(`<td class="workTime">${time}</td>`);
         });
     }
     /**
@@ -859,7 +864,7 @@ class Utils{
 }
 
 class Canvas{
-    constructor(color){
+    constructor(color,workTime){
         this.color = [
             "#ff7f7f",
             "#7f7fff",
@@ -872,6 +877,7 @@ class Canvas{
             "#ffbf7f",
             "#ff7fff"
         ];
+        this.workTime = workTime;
         // Set option Color
         if(color){
             for(let i in color){
@@ -900,7 +906,9 @@ class Canvas{
     */
     setCanvasTag(){
         let firstCell = this.getCoordinate(".TimeTable td:eq(1)");
-        let lastCell  = this.getCoordinate(".TimeTable td:last");
+        // End cell will be different depends on worktime column
+        let last = (this.workTime)?$(".TimeTable td:last").prev():$(".TimeTable td:last");
+        let lastCell  = this.getCoordinate(last);
         // Absolute coordinate & Add Tab tags coordinate
         this.canvasTag.x = firstCell.x;
         this.canvasTag.y = firstCell.y;
