@@ -2,6 +2,7 @@
     width: auto;
     border-spacing: 0;
     font-size: 14px;
+    white-space: nowrap;
 }
 
 .TimeTable th {

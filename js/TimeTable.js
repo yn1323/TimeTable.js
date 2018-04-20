@@ -1,6 +1,6 @@
-'use strict'
+"use strict";
 // Main class for TimeTable.js
-class TimeTable{
+class TimeTable{    // eslint-disable-line no-unused-vars
     constructor(data){
         // Flag for when this instance got error
         this.errFlg = true;
@@ -9,11 +9,11 @@ class TimeTable{
         this.u = new Utils();
         // End if necessary parameter was missing
         if(!this.v.checkExistance())return false;
-        this.startTime  = data['startTime']; // Beginning Time
-        this.endTime    = data['endTime'];   // Endint Time
-        this.divTime    = data['divTime'];   // Unit to Divide time(minutes)
-        this.shiftTime  = data['shift'];     // Time Table Data
-        this.option     = data['option'];     // Other option
+        this.startTime  = data["startTime"]; // Beginning Time
+        this.endTime    = data["endTime"];   // Endint Time
+        this.divTime    = data["divTime"];   // Unit to Divide time(minutes)
+        this.shiftTime  = data["shift"];     // Time Table Data
+        this.option     = data["option"];     // Other option
         // For final check of values
         let arr = [
             this.startTime,
@@ -26,24 +26,24 @@ class TimeTable{
         if(!this.v.checkUndefinedArray(arr)){
             // Error Flag for when this NEW has been failed.
             this.errFlg = false;
-            return false
-        };
+            return false;
+        }
     }
-    get startTime() {return this.START_TIME}
-    set startTime(x){if(this.v.checkStartTime(x)) this.START_TIME = this.v.checkStartTime(x)}
-    get endTime  () {return this.END_TIME  }
-    set endTime  (x){if(this.v.checkEndTime  (x)) this.END_TIME   = this.v.checkEndTime(x)  }
-    get divTime  () {return this.DIV_TIME  }
-    set divTime  (x){if(this.v.checkDivTime  (x)) this.DIV_TIME   = this.v.checkDivTime(x)  }
-    get shiftTime() {return this.SHIFT     }
-    set shiftTime(x){if(this.v.checkShiftTime(x)) this.SHIFT      = this.v.checkShiftTime(x)}
-    get option   () {return this.OPTION    }
-    set option   (x){if(this.v.checkOption   (x)) this.OPTION     = this.v.checkOption(x)   }
-    get selector () {return this.SELECTOR  }
+    get startTime() {return this.START_TIME;}
+    set startTime(x){if(this.v.checkStartTime(x)) this.START_TIME = this.v.checkStartTime(x);}
+    get endTime  () {return this.END_TIME;  }
+    set endTime  (x){if(this.v.checkEndTime  (x)) this.END_TIME   = this.v.checkEndTime(x);  }
+    get divTime  () {return this.DIV_TIME;  }
+    set divTime  (x){if(this.v.checkDivTime  (x)) this.DIV_TIME   = this.v.checkDivTime(x);  }
+    get shiftTime() {return this.SHIFT;     }
+    set shiftTime(x){if(this.v.checkShiftTime(x)) this.SHIFT      = this.v.checkShiftTime(x);}
+    get option   () {return this.OPTION;    }
+    set option   (x){if(this.v.checkOption   (x)) this.OPTION     = this.v.checkOption(x);   }
+    get selector () {return this.SELECTOR;  }
     set selector (x){this.SELECTOR = x;    }
-    get coordinate () {return this.COORDINATE  }
+    get coordinate () {return this.COORDINATE;  }
     set coordinate (x){this.COORDINATE = x;    }
-    get table () {return this.TABLE  }
+    get table () {return this.TABLE;  }
     set table (x){this.TABLE = x;    }
     /*
     To generate TimeTable where class name is "TimeTable"
@@ -60,9 +60,12 @@ class TimeTable{
         this.createTable();
         // Set Coordinate for plotting bar
         this.debug(this.table);
-        this.setCoordinate();
+        //this.setCoordinate();
         // Set Time to table
         this.appendTime();
+
+        // Set options
+        this.setOption();
     }
     /*
     Create Table for append document.
@@ -119,10 +122,10 @@ class TimeTable{
             let tr = $("<tr></tr>", {id: `name-${INDEX[i]}`});
             for(let j = 0; j < COLUMNS; j++){
                 let timeAttr =  this.startTime + this.divTime * j;
-                let td = $(`<td></td>`);
+                let td = $("<td></td>");
                 // Set id for getting coordinate
-                td.attr('id', `${i}-${j}`);
-                td.attr('time', timeAttr);
+                td.attr("id", `${i}-${j}`);
+                td.attr("time", timeAttr);
                 tr.append(td);
             }
             base.append(tr);
@@ -139,7 +142,7 @@ class TimeTable{
         // id for find
         const INDEX = this.c.getIndex(this.shiftTime);
         // Column of Header
-        base.find("#theader").prepend('<th>NAME</th>');
+        base.find("#theader").prepend("<th>NAME</th>");
         // Column of Data
         for(let i = 0; i < NAMES.length; i ++){
             let td = base.find(`#name-${INDEX[i]}`);
@@ -149,27 +152,26 @@ class TimeTable{
     }
     /*
     Function to set coordinate of each td
-    */
     setCoordinate(){
-        let table = this.table;
         const COLUMNS = this.c.countColumns(this.startTime, this.endTime, this.divTime);
         const ROWS   = this.c.getNames(this.shiftTime).length;
         let coordinate = {};
         for(let i = 0; i < ROWS; i++){
             for(let j = 0; j < COLUMNS; j++){
                 // Create ID
-                let tdIndex = `${i}-${j}`
+                let tdIndex = `${i}-${j}`;
                 let tdCoordinate = $(`#${tdIndex}`).offset();
                 coordinate[tdIndex] = tdCoordinate;
             }
         }
         this.coordinate = coordinate;
     }
+    */
     /*
     Function to append time bar to created table
     */
     appendTime(){
-        const canvas = new Canvas();
+        const canvas = new Canvas(this.option.bgcolor);
         let timeData = this.c.getIndexAndTime(this.shiftTime);
         let gen = this.u.colorTimeGenerator(timeData);
         for(;;){
@@ -179,13 +181,19 @@ class TimeTable{
             if(!index)break;
             // Get id of dom which will plot start time and end time
             let [sId,eId] = this.u.searchNearestDom(index,s,e);
+            // If there is no next element, the coordinate may be not proper.
+            let over = false;
+            if(!$(`#${eId}`).next().length){
+                over = this.u.checkOver(e,eId);
+            }
             // Draw Line
-            canvas.drawLine(sId,eId,color);
-            console.log(this.coordinate);
-            // temp
-            //break;
+            canvas.drawLine(sId,eId,color,over);
         }
-        return;
+    }
+
+    setOption(){
+        // Set work time
+        //if()
     }
     debug(str){
         $("#debug").append(str);
@@ -204,27 +212,27 @@ class Message{
     */
     setErrorMessage(){
         // About Time
-        this.ermsg['TIME_LENGTH']        = "[TIME] TIME LENGTH IS NOT 5. FORMAT HAS TO BE 'HH:MM'";
-        this.ermsg['TIME_DELIMETER']     = "[TIME] DELIMETER SHOULD BE ':' IN 3RD CHARACTER";
-        this.ermsg['TIME_HOUR_RANGE']    = "[TIME] HOUR HAS TO BE BETWEEN 00 to 23";
-        this.ermsg['TIME_MINUTE_RANGE']  = "[TIME] MINUTS HAS TO BE BETWEEN 00 to 59";
-        this.ermsg['DIVTIME_RANGE']      = "[TIME] DIV TIME HAS TO BE BETWEEN 1 to 60";
-        this.ermsg['DIVTIME_RANGE2']     = "[TIME] divTime HAS TO BE  1,2,3,5,6,10,12,15,20,30, or 60";
+        this.ermsg["TIME_LENGTH"]        = "[TIME] TIME LENGTH IS NOT 5. FORMAT HAS TO BE 'HH:MM'";
+        this.ermsg["TIME_DELIMETER"]     = "[TIME] DELIMETER SHOULD BE ':' IN 3RD CHARACTER";
+        this.ermsg["TIME_HOUR_RANGE"]    = "[TIME] HOUR HAS TO BE BETWEEN 00 to 23";
+        this.ermsg["TIME_MINUTE_RANGE"]  = "[TIME] MINUTS HAS TO BE BETWEEN 00 to 59";
+        this.ermsg["DIVTIME_RANGE"]      = "[TIME] DIV TIME HAS TO BE BETWEEN 1 to 60";
+        this.ermsg["DIVTIME_RANGE2"]     = "[TIME] divTime HAS TO BE  1,2,3,5,6,10,12,15,20,30, or 60";
         // About Shift
-        this.ermsg['SHIFT_LENGTH']       = "[SHIFT] TIME LENGTH IS NOT 11. FORMAT HAS TO BE 'HH:MM-HH:MM'";
-        this.ermsg['SHIFT_DELIMETER']    = "[SHIFT] DELIMETER SHOULD BE '-' IN 6TH CHARACTER";
-        this.ermsg['SHIFT_TIME']         = "[SHIFT] TIME";
-        this.ermsg['SHIFT_COLOR_LENGTH'] = "[TIME] TIME LENGTH IS NOT 1.";
-        this.ermsg['SHIFT_COLOR_RANGE']  = "[SHIFT] COLOR HAS TO BE BETWEEN 1 to 9";
+        this.ermsg["SHIFT_LENGTH"]       = "[SHIFT] TIME LENGTH IS NOT 11. FORMAT HAS TO BE 'HH:MM-HH:MM'";
+        this.ermsg["SHIFT_DELIMETER"]    = "[SHIFT] DELIMETER SHOULD BE '-' IN 6TH CHARACTER";
+        this.ermsg["SHIFT_TIME"]         = "[SHIFT] TIME";
+        this.ermsg["SHIFT_COLOR_LENGTH"] = "[TIME] TIME LENGTH IS NOT 1.";
+        this.ermsg["SHIFT_COLOR_RANGE"]  = "[SHIFT] COLOR HAS TO BE BETWEEN 0 to 9";
         // About Data Type
-        this.ermsg['STRING_DATA_TYPE']  = "[DATA] HAS TO BE STRING";
-        this.ermsg['NOT_NUMBER']        = "[DATA] HAS TO BE NUMBER";
-        this.ermsg['NOT_BOOLEAN']       = "[DATA] HAS TO BE TRUE OR FALSE";
-        this.ermsg['NOT_COLOR_CODE']    = "[DATA] COLOR CODE HAS TO BE # AND 1-9";
+        this.ermsg["STRING_DATA_TYPE"]  = "[DATA] HAS TO BE STRING";
+        this.ermsg["NOT_NUMBER"]        = "[DATA] HAS TO BE NUMBER";
+        this.ermsg["NOT_BOOLEAN"]       = "[DATA] HAS TO BE TRUE OR FALSE";
+        this.ermsg["NOT_COLOR_CODE"]    = "[DATA] COLOR CODE HAS TO BE # AND 0-F IN 3 OR 6 DIGITS";
         // Existance Error
-        this.ermsg['NO_STARTTIME']      = "[NO_DATE] startTime WAS NOT SET TO PARAMETER";
-        this.ermsg['NO_ENDTIME']        = "[NO_DATE] endTime WAS NOT SET TO PARAMETER";
-        this.ermsg['NO_DIVTIME']        = "[NO_DATE] divTime WAS NOT SET TO PARAMETER";
+        this.ermsg["NO_STARTTIME"]      = "[NO_DATE] startTime WAS NOT SET TO PARAMETER";
+        this.ermsg["NO_ENDTIME"]        = "[NO_DATE] endTime WAS NOT SET TO PARAMETER";
+        this.ermsg["NO_DIVTIME"]        = "[NO_DATE] divTime WAS NOT SET TO PARAMETER";
     }
 }
 
@@ -248,11 +256,11 @@ class Validation extends Message{
         let flg = true;
         try{
             // Check existance of startTime
-            if(this.data['startTime'] == null)throw new Error(this.ermsg['NO_STARTTIME']);
+            if(this.data["startTime"] == null)throw new Error(this.ermsg["NO_STARTTIME"]);
             // Check existance of endTime
-            if(this.data['endTime'] == null)  throw new Error(this.ermsg['NO_ENDTIME']);
+            if(this.data["endTime"] == null)  throw new Error(this.ermsg["NO_ENDTIME"]);
             // Check existance of endTime
-            if(this.data['divTime'] == null)  throw new Error(this.ermsg['NO_DIVTIME']);
+            if(this.data["divTime"] == null)  throw new Error(this.ermsg["NO_DIVTIME"]);
         }catch(e){
             console.error(e);
             flg = false;
@@ -269,7 +277,7 @@ class Validation extends Message{
         if(!this.timeValidation(time))return 0;
         let intTime = this.calc.time2Int(time);
         // Only when required 24 hours time schedule
-        if(this.data['startTime'] === this.data['endTime']){
+        if(this.data["startTime"] === this.data["endTime"]){
             intTime = 0;
         }
         this.START_TIME = intTime;
@@ -284,7 +292,7 @@ class Validation extends Message{
         if(!this.timeValidation(time))return 0;
         let intTime = this.calc.time2Int(time);
         // Only when required 24 hours time schedule
-        if(this.data['startTime'] === this.data['endTime']){
+        if(this.data["startTime"] === this.data["endTime"]){
             intTime = 0;
         }
         // When schedule needs to set after 00:00.
@@ -322,11 +330,9 @@ class Validation extends Message{
     */
     checkOption(option){
         // Set default value if there is no workTime option
-        if(!option['workTime'])option['workTime']   = false;
+        if(!option["workTime"])option["workTime"]   = false;
         // Set default value if there is no bgcolor option
-        if(!option['bgcolor'])option['bgcolor']     = '#FFF';
-        // Set default value if there is no bgcolor option
-        if(!option['selectBox'])option['selectBox'] = null;
+        if(!option["selectBox"])option["selectBox"] = null;
         // Check each values;
         if(!this.optionValidation(option)    )return null;
         return option;
@@ -359,23 +365,23 @@ class Validation extends Message{
         let flg = true;
         try{
             // Data type check
-            if(typeof(time) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+            if(typeof(time) !== "string")throw new Error(this.ermsg["STRING_DATA_TYPE"]);
             // Lack or too much length
-            if(time.length !== 5)throw new Error(this.ermsg['TIME_LENGTH']);
+            if(time.length !== 5)throw new Error(this.ermsg["TIME_LENGTH"]);
             // Delimiter check
-            if(time.substring(2,3) !== ':')throw new Error(this.ermsg['TIME_DELIMETER']);
+            if(time.substring(2,3) !== ":")throw new Error(this.ermsg["TIME_DELIMETER"]);
             const hour   = time.substring(0,2);
             const minute = time.substring(3,5);
             // Check whether hour and minute are number
-            if(isNaN(hour)||isNaN(minute))throw new Error(this.ermsg['NOT_NUMBER']);
+            if(isNaN(hour)||isNaN(minute))throw new Error(this.ermsg["NOT_NUMBER"]);
             const intHour   = parseInt(hour,10);
             const intMinute = parseInt(minute,10);
             // Check Range of hour
-            if(!(intHour >= 0 && intHour < 24))throw new Error(this.ermsg['TIME_HOUR_RANGE']);
+            if(!(intHour >= 0 && intHour < 24))throw new Error(this.ermsg["TIME_HOUR_RANGE"]);
             // Check Range of minute
-            if(!(intMinute >= 0 && intMinute < 60))throw new Error(this.ermsg['TIME_MINUTE_RANGE']);
+            if(!(intMinute >= 0 && intMinute < 60))throw new Error(this.ermsg["TIME_MINUTE_RANGE"]);
         }catch(e){
-            console.error(e + ' => ' + time);
+            console.error(e + " => " + time);
             flg = false;
         }
         return flg;
@@ -390,16 +396,16 @@ class Validation extends Message{
         let flg = true;
         try{
             // Data type check
-            if(typeof(divTime) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+            if(typeof(divTime) !== "string")throw new Error(this.ermsg["STRING_DATA_TYPE"]);
             // Check whether hour and minute are number
-            if(isNaN(divTime))throw new Error(this.ermsg['NOT_NUMBER']);
+            if(isNaN(divTime))throw new Error(this.ermsg["NOT_NUMBER"]);
             // Check Range of minute
             const intDivTime = parseInt(divTime,10);
-            if(!(intDivTime > 0 && intDivTime <= 60))throw new Error(this.ermsg['DIVTIME_RANGE']);
+            if(!(intDivTime > 0 && intDivTime <= 60))throw new Error(this.ermsg["DIVTIME_RANGE"]);
             // divTime should be 1,2,3,5,6,10,12,15,20,30,60
-            if(60 % divTime != 0)throw new Error(this.ermsg['DIVTIME_RANGE2']);
+            if(60 % divTime != 0)throw new Error(this.ermsg["DIVTIME_RANGE2"]);
         }catch(e){
-            console.error(e + ' => ' + divTime);
+            console.error(e + " => " + divTime);
             flg = false;
         }
         return flg;
@@ -414,8 +420,8 @@ class Validation extends Message{
         // flag to detect error(true: No error, false: Has error)
         let flg = true;
         // Declare here to display errored message in catch(e)
-        let shiftColor = '';
-        let shiftTime = '';
+        let shiftColor = "";
+        let shiftTime = "";
         try{
             // Check value in Jason
             // Access to Object rooted to Index Key
@@ -437,7 +443,7 @@ class Validation extends Message{
                 }
             }
         }catch(e){
-            console.error(e + ' => ' + shiftColor + ':' + shiftTime);
+            console.error(e + " => " + shiftColor + ":" + shiftTime);
             flg = false;
         }
         return flg;
@@ -454,16 +460,16 @@ class Validation extends Message{
         // Declare here to display errored message in catch(e)
         try{
             // Data type check
-            if(typeof(color) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+            if(typeof(color) !== "string")throw new Error(this.ermsg["STRING_DATA_TYPE"]);
             // Lack or too much length
-            if(color.length !== 1)throw new Error(this.ermsg['SHIFT_COLOR_LENGTH']);
+            if(color.length !== 1)throw new Error(this.ermsg["SHIFT_COLOR_LENGTH"]);
             // Check whether hour and minute are number
-            if(isNaN(color))throw new Error(this.ermsg['NOT_NUMBER']);
+            if(isNaN(color))throw new Error(this.ermsg["NOT_NUMBER"]);
             // Check range
             const INTCOLOR = parseInt(color,10);
-            if(!(INTCOLOR > 0 && INTCOLOR <= 9)) throw new Error(this.ermsg['SHIFT_COLOR_RANGE']);
+            if(!(INTCOLOR >= 0 && INTCOLOR <= 9)) throw new Error(this.ermsg["SHIFT_COLOR_RANGE"]);
         }catch(e){
-            console.error(e + ' => ' + color);
+            console.error(e + " => " + color);
             flg = false;
         }
         return flg;
@@ -479,16 +485,16 @@ class Validation extends Message{
         let flg = true;
         try{
             // Data type check
-            if(typeof(shift) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+            if(typeof(shift) !== "string")throw new Error(this.ermsg["STRING_DATA_TYPE"]);
             // Lack or too much length
-            if(shift.length !== 11)throw new Error(this.ermsg['SHIFT_LENGTH']);
+            if(shift.length !== 11)throw new Error(this.ermsg["SHIFT_LENGTH"]);
             // Delimiter check
-            if(shift.substring(5,6) !== '-')throw new Error(this.ermsg['SHIFT_DELIMETER']);
+            if(shift.substring(5,6) !== "-")throw new Error(this.ermsg["SHIFT_DELIMETER"]);
             // Check beginning & ending time format
-            if(!this.timeValidation(shift.substring(0,5))) throw new Error(this.ermsg['SHIFT_TIME']);
-            if(!this.timeValidation(shift.substring(6,11)))throw new Error(this.ermsg['SHIFT_TIME']);
+            if(!this.timeValidation(shift.substring(0,5))) throw new Error(this.ermsg["SHIFT_TIME"]);
+            if(!this.timeValidation(shift.substring(6,11)))throw new Error(this.ermsg["SHIFT_TIME"]);
         }catch(e){
-            console.error(e + ' => ' + shift);
+            console.error(e + " => " + shift);
             flg = false;
         }
         return flg;
@@ -506,29 +512,33 @@ class Validation extends Message{
         let target;
         try{
             // Check workTime
-            target = option['workTime'];
-            if(typeof(target) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
-            if(!(target.toUpperCase() === 'TRUE' || target.toUpperCase() === 'FALSE')){
-                throw new Error(this.ermsg['NOT_BOOLEAN']);
+            target = option["workTime"];
+            if(typeof(target) !== "string")throw new Error(this.ermsg["STRING_DATA_TYPE"]);
+            if(!(target.toUpperCase() === "TRUE" || target.toUpperCase() === "FALSE")){
+                throw new Error(this.ermsg["NOT_BOOLEAN"]);
             }
             // Check bgColor
-            target = option['bgcolor'];
-            if(typeof(target) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
-            // Color code reg
-            var regex = new RegExp(/^#([\da-fA-F]{6}|[\da-fA-F]{3})$/);
-            if(!regex.test(target))throw new Error(this.ermsg['NOT_COLOR_CODE']);
+            target = option["bgcolor"];
+            for(let i in target){
+                let color = target[i];
+                if(typeof(color) !== "string")throw new Error(this.ermsg["STRING_DATA_TYPE"]);
+                // Color code reg
+                var regex = new RegExp(/^#([\da-fA-F]{6}|[\da-fA-F]{3})$/);
+                if(!regex.test(color))throw new Error(this.ermsg["NOT_COLOR_CODE"]);
+            }
+
 
             // Check selectBox
-            const obj = option['selectBox']
+            const obj = option["selectBox"];
             // Access to Key & Value
             for(let key in obj){
                 target = key;
-                if(typeof(target) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+                if(typeof(target) !== "string")throw new Error(this.ermsg["STRING_DATA_TYPE"]);
                 target = obj[key];
-                if(typeof(target) !== 'string')throw new Error(this.ermsg['STRING_DATA_TYPE']);
+                if(typeof(target) !== "string")throw new Error(this.ermsg["STRING_DATA_TYPE"]);
             }
         }catch(e){
-            console.error(e + ' => ' + target);
+            console.error(e + " => " + target);
             flg = false;
         }
         return flg;
@@ -564,7 +574,7 @@ class Calculation{
     @return  {int}        : Time converted as minutes
     @example : 1425
     */
-    time2Int(time,option){
+    time2Int(time){
         // Hour
         const h = time.substring(0,2);
         // Minute
@@ -581,10 +591,11 @@ class Calculation{
     int2Time(time){
         // Hour
         let h = Math.floor(time / 60);
+        if(h >= 24)h -= 24;
         // Minute
         let m = time % 60;
         // Add 0 when only 1 digit
-        return (this.toDoubleDigits(h) + ':' +  this.toDoubleDigits(m))
+        return (this.toDoubleDigits(h) + ":" +  this.toDoubleDigits(m));
     }
     /*
     Add 0 to number if it is only 1 digit
@@ -607,7 +618,7 @@ class Calculation{
     */
     countColumns(s,e,d){
         const columns = (e - s) / d;
-        return columns
+        return columns;
     }
     /*
     Get index in shift object
@@ -712,15 +723,15 @@ class Utils{
     searchNearestDom(index,s,e){
         let [time,id] = this.getOneRowArrtibure(index);
         // Stores nearest id
-        let startId = '';
-        let endId = '';
+        let startId = "";
+        let endId = "";
         // Stores nearest time
         let st=5000;
         let et=5000;
         for(let i in time){
             let attrTime = parseInt(time[i],10);
             if(Math.abs(attrTime - s) <= Math.abs(st - s)){
-                st = attrTime
+                st = attrTime;
                 startId = id[i];
             }
             if(Math.abs(attrTime - e) <= Math.abs(et - e)){
@@ -743,17 +754,37 @@ class Utils{
         $(`#name-${index} td`).each((i,elem)=>{
             // Skip Header Row
             if(i){
-                let el = $(elem)
-                time.push(el.attr('time'));
-                id.push(el.attr('id'));
+                let el = $(elem);
+                time.push(el.attr("time"));
+                id.push(el.attr("id"));
             }
         });
         return [time,id];
     }
+    /**
+     * checkOver - Check whether the bar passes or reaches to last cell
+     *
+     * @param  {int} e  : time
+     * @param  {str} eId : ID Number in str
+     * @return {boolean}
+     */
+    checkOver(e,eId){
+        let bool = false;
+        let cell = $(`#${eId}`);
+        let cellTime = parseInt(cell.attr("time"),10);
+        let prevCellTime = parseInt(cell.prev().attr("time"),10);
+        // Next Time is not in DOM. Its temporary value.
+        let nextTime = cellTime + cellTime - prevCellTime;
+        // The end time is closer to next time.
+        if(Math.abs(cellTime - e) >= Math.abs(nextTime - e)){
+            bool = true;
+        }
+        return bool;
+    }
 }
 
 class Canvas{
-    constructor(){
+    constructor(color){
         this.color = [
             "#ff7f7f",
             "#7f7fff",
@@ -764,7 +795,14 @@ class Canvas{
             "#7fbfff",
             "#bfff7f",
             "#ffbf7f",
+            "#ff7fff"
         ];
+        // Set option Color
+        if(color){
+            for(let i in color){
+                this.color[i] = color[i];
+            }
+        }
         // To store canvas tag beginning position and size
         this.canvasTag = {};
         // To store cell size
@@ -777,33 +815,34 @@ class Canvas{
     * Measure cell size and set to constructor
     */
     measureCellSize(){
-        let target = $('.TimeTable td:eq(1)');
-        this.cell.width = target.outerWidth();
+        let target = $(".TimeTable td:eq(1)");
+        // +1 is padding of rightmost cell
+        this.cell.width = target.outerWidth() + 1;
         this.cell.height = target.outerHeight();
     }
     /**
     * setCanvasTag - Append to Dom and set to constructor
     */
     setCanvasTag(){
-        let firstCell = this.getCoordinate('.TimeTable td:eq(1)');
-        let lastCell  = this.getCoordinate('.TimeTable td:last');
-        let table     = this.getCoordinate('.TimeTable');
+        let firstCell = this.getCoordinate(".TimeTable td:eq(1)");
+        let lastCell  = this.getCoordinate(".TimeTable td:last");
         // Absolute coordinate & Add Tab tags coordinate
         this.canvasTag.x = firstCell.x;
-        this.canvasTag.y = firstCell.y
+        this.canvasTag.y = firstCell.y;
         // Add cell size
-        // +1 is padding of rightmost cell
-        this.canvasTag.width = lastCell.x - firstCell.x + this.cell.width + 1;
+        this.canvasTag.width = lastCell.x - firstCell.x + this.cell.width;
         this.canvasTag.height = lastCell.y - firstCell.y + this.cell.height;
         let canvas = $("<canvas>",{class:"TimeBar"});
         canvas.css({
-            height: this.canvasTag.height,
-            width: this.canvasTag.width,
             position: "absolute",
             top: this.canvasTag.y,
             left: this.canvasTag.x,
         });
-        $('.TimeTable').prepend(canvas);
+        canvas.attr({
+            height: this.canvasTag.height,
+            width: this.canvasTag.width,
+        });
+        $(".TimeTable").prepend(canvas);
     }
     /**
     * drawLine - To draw canvas line from sId to eId
@@ -811,9 +850,12 @@ class Canvas{
     * @param  {str} sId   : id to start draw line
     * @param  {str} eId   : id to end drawing line
     * @param  {str} color : decide color to use
+    * @param  {boolean} over : Whether line reach to rightmost column or more than it.
+    *                          Not able to reach last cell because of
+    *                          no coordinate in end of cell.
     * @return {boolearn}  :
     */
-    drawLine(sId,eId,color){
+    drawLine(sId,eId,color,over){
         // Coordinate of start and end
         let sc = this.getCoordinate(`#${sId}`);
         let ec  = this.getCoordinate(`#${eId}`);
@@ -824,6 +866,8 @@ class Canvas{
         let middle = this.cell.height / 2;
         sc.y += middle;
         ec.y += middle;
+        // When over or reach to last cell.
+        if(over){ec.x += this.cell.width + 1;}
         // Init canvas
         let canvas = $(".TimeBar").get(0);
         var ctx = canvas.getContext("2d") ;
@@ -839,8 +883,6 @@ class Canvas{
         // Plot!!
         ctx.stroke() ;
     }
-
-
     /**
      * a2R - Convert absolut coordinate to relative coordiante(Use in Canvas)
      *
@@ -864,19 +906,21 @@ class Canvas{
         let element = $(selector).get(0);
         let rect = element.getBoundingClientRect();
         obj.x = rect.left + window.pageXOffset;
-        obj.y = rect.top + window.pageYOffset
+        obj.y = rect.top + window.pageYOffset;
         return obj;
     }
     debugDot(x,y){
         let canvas = $("<canvas>",{id: "debugdot"});
         canvas.css({
-            height: 20,
-            width: 20,
             position: "absolute",
             top: y,
             left: x,
         });
-        $('body').prepend(canvas);
+        canvas.attr({
+            height: 20,
+            width: 20,
+        });
+        $("body").prepend(canvas);
         let element = $("#debugdot").get(0);
         var ctx = element.getContext("2d");
         // パスをリセット
