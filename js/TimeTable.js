@@ -6,7 +6,6 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         this.errFlg = true;
         this.v = new Validation(data);
         this.c = new Calculation();
-        this.u = new Utils();
         // End if necessary parameter was missing
         if(!this.v.checkExistance())return false;
         this.startTime  = data["startTime"]; // Beginning Time
@@ -28,6 +27,9 @@ class TimeTable{    // eslint-disable-line no-unused-vars
             this.errFlg = false;
             return false;
         }
+        // Make instance after passes validation has done
+        this.can = new Canvas(this.option.bgcolor,this.option["workTime"]);
+        this.u = new Utils();
     }
     get startTime() {return this.START_TIME;}
     set startTime(x){if(this.v.checkStartTime(x)) this.START_TIME = this.v.checkStartTime(x);}
@@ -64,6 +66,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         if(this.option["workTime"])this.setWorkTimeColumn();
         // Set Coordinate for plotting bar
         this.debug(this.table);
+        this.can.init();
         //this.setCoordinate();
         // Set Time to table
         this.appendTime();
@@ -165,29 +168,28 @@ class TimeTable{    // eslint-disable-line no-unused-vars
     /*
     Function to set coordinate of each td
     setCoordinate(){
-        const COLUMNS = this.c.countColumns(this.startTime, this.endTime, this.divTime);
-        const ROWS   = this.c.getNames(this.shiftTime).length;
-        let coordinate = {};
-        for(let i = 0; i < ROWS; i++){
-            for(let j = 0; j < COLUMNS; j++){
-                // Create ID
-                let tdIndex = `${i}-${j}`;
-                let tdCoordinate = $(`#${tdIndex}`).offset();
-                coordinate[tdIndex] = tdCoordinate;
-            }
-        }
-        this.coordinate = coordinate;
-    }
-    */
+    const COLUMNS = this.c.countColumns(this.startTime, this.endTime, this.divTime);
+    const ROWS   = this.c.getNames(this.shiftTime).length;
+    let coordinate = {};
+    for(let i = 0; i < ROWS; i++){
+    for(let j = 0; j < COLUMNS; j++){
+    // Create ID
+    let tdIndex = `${i}-${j}`;
+    let tdCoordinate = $(`#${tdIndex}`).offset();
+    coordinate[tdIndex] = tdCoordinate;
+}
+}
+this.coordinate = coordinate;
+}
+*/
     /*
-    Function to append time bar to created table
-    */
+Function to append time bar to created table
+*/
     appendTime(){
-        const canvas = new Canvas(this.option.bgcolor,this.option["workTime"]);
         let timeData = this.c.getIndexAndTime(this.shiftTime);
         let gen = this.u.colorTimeGenerator(timeData);
         for(;;){
-            // Analyze object
+        // Analyze object
             let [index,color,s,e] = gen.next().value;
             // End of generator
             if(!index)break;
@@ -202,12 +204,15 @@ class TimeTable{    // eslint-disable-line no-unused-vars
                 over = this.u.checkOver(e,eId);
             }
             // Draw Line
-            canvas.drawLine(sId,eId,color,over);
+            let shape = this.can.drawLine(sId,eId,color,over);
+            // Add mouse over Tooltip event
+            let time = `${this.c.int2Time(s)}-${this.c.int2Time(e)}`;
+            this.can.addMouseOverTooltip(shape, time, sId);
         }
     }
     /**
-     * setWorkTimeColumn - description
-     */
+* setWorkTimeColumn - description
+*/
     setWorkTimeColumn(){
         let header = this.table.find("#theader");
         header.append("<th>合計時間</th>");
@@ -218,11 +223,11 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         });
     }
     /**
-     * createSelectBox -- Had to create as string to append select box
-     * Give randome if shift index was not in selectBox index
-     * TODO: Create Select box as dom
-     * @return {str}  select box tags;
-     */
+* createSelectBox -- Had to create as string to append select box
+* Give randome if shift index was not in selectBox index
+* TODO: Create Select box as dom
+* @return {str}  select box tags;
+*/
     createSelectBox(index,name){
         let selectTag = "<select class=\"timeTableSelectbox\">";
         let str = "";
@@ -232,8 +237,8 @@ class TimeTable{    // eslint-disable-line no-unused-vars
             if(i !== index){
                 str += `<option value="${i}">${obj[i]}</option>`;
             }else{
-                // Even shift name and selectBox name did not match,
-                // set shift name
+            // Even shift name and selectBox name did not match,
+            // set shift name
                 str += `<option value="${i}" selected>${name}</option>`;
                 matchFlg = true;
             }
@@ -725,12 +730,12 @@ class Calculation{
         return obj;
     }
     /**
-     * getTotalShiftTime
-     *
-     * @param  {str} id
-     * @param  {object} shift
-     * @return {str} time : Format will be HH:MM
-     */
+    * getTotalShiftTime
+    *
+    * @param  {str} id
+    * @param  {object} shift
+    * @return {str} time : Format will be HH:MM
+    */
     getTotalShiftTime(id,shift){
         let index = id.replace( "name-" , "" );
         let timeArray = this.getShiftTimeFromIndex(index,shift);
@@ -742,11 +747,11 @@ class Calculation{
         return this.int2Time(totalTime);
     }
     /**
-     * getShiftTimeFromIndex
-     *
-     * @param  {str}   index
-     * @return {array} time  : Array of Shift Time
-     */
+    * getShiftTimeFromIndex
+    *
+    * @param  {str}   index
+    * @return {array} time  : Array of Shift Time
+    */
     getShiftTimeFromIndex(index,shift){
         let timeArray = [];
         let names = shift[index];
@@ -758,6 +763,20 @@ class Calculation{
             }
         }
         return timeArray;
+    }
+    /**
+    * getCoordinate - Get aboslute coordinate of Element
+    *
+    * @param  {dom} selector
+    * @return {obj} obj : Object contains coordinate of cell
+    */
+    getCoordinate(selector){
+        let obj = {};
+        let element = $(selector).get(0);
+        let rect = element.getBoundingClientRect();
+        obj.x = rect.left + window.pageXOffset;
+        obj.y = rect.top + window.pageYOffset;
+        return obj;
     }
 }
 
@@ -842,12 +861,12 @@ class Utils{
         return [time,id];
     }
     /**
-     * checkOver - Check whether the bar passes or reaches to last cell
-     *
-     * @param  {int} e  : time
-     * @param  {str} eId : ID Number in str
-     * @return {boolean}
-     */
+    * checkOver - Check whether the bar passes or reaches to last cell
+    *
+    * @param  {int} e  : time
+    * @param  {str} eId : ID Number in str
+    * @return {boolean}
+    */
     checkOver(e,eId){
         let bool = false;
         let cell = $(`#${eId}`);
@@ -863,8 +882,9 @@ class Utils{
     }
 }
 
-class Canvas{
+class Canvas extends Calculation{
     constructor(color,workTime){
+        super();
         this.color = [
             "#ff7f7f",
             "#7f7fff",
@@ -886,11 +906,21 @@ class Canvas{
         }
         // To store canvas tag beginning position and size
         this.canvasTag = {};
+        // Select of canvas tag. This selector is for draw as canvas.
+        this.canvasSelector = null;
         // To store cell size
         this.cell = {};
+        // Set stage for each object
+        this.stage = null;
+    }
+
+    /**
+    * Process needs to be done after Table is appeded to html
+    */
+    init(){
         this.measureCellSize();
-        // Create canvas tag in clickable area
         this.setCanvasTag();
+        this.stage = new createjs.Stage(this.canvasSelector);
     }
     /**
     * Measure cell size and set to constructor
@@ -915,7 +945,7 @@ class Canvas{
         // Add cell size
         this.canvasTag.width = lastCell.x - firstCell.x + this.cell.width;
         this.canvasTag.height = lastCell.y - firstCell.y + this.cell.height;
-        let canvas = $("<canvas>",{class:"TimeBar"});
+        let canvas = $("<canvas>",{id:"timeBar"});
         canvas.css({
             position: "absolute",
             top: this.canvasTag.y,
@@ -926,6 +956,7 @@ class Canvas{
             width: this.canvasTag.width,
         });
         $(".TimeTable").prepend(canvas);
+        this.canvasSelector = $("#timeBar").get(0);
     }
     /**
     * drawLine - To draw canvas line from sId to eId
@@ -936,9 +967,48 @@ class Canvas{
     * @param  {boolean} over : Whether line reach to rightmost column or more than it.
     *                          Not able to reach last cell because of
     *                          no coordinate in end of cell.
-    * @return {boolearn}  :
+    * @return {shape} shape : object in canvas
+    * @return {obj} sc : StartCoordinate to display tooltip
     */
     drawLine(sId,eId,color,over){
+        let [sc,ec] = this.calculateLineCoordinate(sId,eId,over);
+        let barColor = this.color[parseInt(color,10)];
+        let shape = new createjs.Shape();
+        shape.graphics
+            .setStrokeStyle(10)
+            .beginStroke(barColor)
+            .moveTo(sc.x,sc.y)
+            .lineTo(ec.x,ec.y)
+            .endStroke();
+        this.stage.addChild(shape);
+        this.stage.update();
+        return shape;
+    }
+    /**
+    * a2R - Convert absolut coordinate to relative coordiante(Use in Canvas)
+    *
+    * @param  {obj} coordinate : Must have format of {x: x, y: y}
+    * @return {obj} obj        : Converted object
+    */
+    a2R(coordinate){
+        let obj = {};
+        obj.x = coordinate.x - this.canvasTag.x;
+        obj.y = coordinate.y - this.canvasTag.y;
+        return obj;
+    }
+    /**
+    * calculateLineCoordinate - To Calculate coordinate to draw line
+    *
+    * @param  {str} sId   : id to start draw line
+    * @param  {str} eId   : id to end drawing line
+    * @param  {boolean} over : Whether line reach to rightmost column or more than it.
+    *                          Not able to reach last cell because of
+    *                          no coordinate in end of cell.
+    * @return {obj}  sc : starting coordinate
+    * @return {obj}  ec : starting coordinate
+    */
+    calculateLineCoordinate(sId,eId,over){
+        // Coordinates to reaturn
         // Coordinate of start and end
         let sc = this.getCoordinate(`#${sId}`);
         let ec  = this.getCoordinate(`#${eId}`);
@@ -951,46 +1021,7 @@ class Canvas{
         ec.y += middle;
         // When over or reach to last cell.
         if(over){ec.x += this.cell.width + 1;}
-        // Init canvas
-        let canvas = $(".TimeBar").get(0);
-        var ctx = canvas.getContext("2d") ;
-        ctx.beginPath();
-        // Start
-        ctx.moveTo(sc.x, sc.y);
-        // End
-        ctx.lineTo(ec.x, ec.y);
-        // Color
-        ctx.strokeStyle = this.color[parseInt(color,10)];
-        // Line width
-        ctx.lineWidth = 10;
-        // Plot!!
-        ctx.stroke() ;
-    }
-    /**
-     * a2R - Convert absolut coordinate to relative coordiante(Use in Canvas)
-     *
-     * @param  {obj} coordinate : Must have format of {x: x, y: y}
-     * @return {obj} obj        : Converted object
-     */
-    a2R(coordinate){
-        let obj = {};
-        obj.x = coordinate.x - this.canvasTag.x;
-        obj.y = coordinate.y - this.canvasTag.y;
-        return obj;
-    }
-    /**
-    * getCoordinate - Get aboslute coordinate of Element
-    *
-    * @param  {dom} selector
-    * @return {obj} obj : Object contains coordinate of cell
-    */
-    getCoordinate(selector){
-        let obj = {};
-        let element = $(selector).get(0);
-        let rect = element.getBoundingClientRect();
-        obj.x = rect.left + window.pageXOffset;
-        obj.y = rect.top + window.pageYOffset;
-        return obj;
+        return [sc,ec];
     }
     debugDot(x,y){
         let canvas = $("<canvas>",{id: "debugdot"});
@@ -1011,5 +1042,43 @@ class Canvas{
         ctx.fillStyle = "red";
         ctx.fillRect(x, y, 2, 2);
         ctx.stroke();
+    }
+    /**
+    * addMouseOverTooltip - Add event to display Tooltip
+    *
+    * @param  {shape} select selector of shape
+    * @param  {str} msg    msg to display
+    * @param  {obj} sId     Coordinate to display tool tip
+    */
+    addMouseOverTooltip(select, msg, sId){
+        $(select).on({
+            "click":()=>{
+                // Shifting Pointing part of Tool tip
+                let yToShift = this.cell.height - 5;
+                // Coordinate of Tooltip to Display
+                let toolTipToDisplay = super.getCoordinate(`#${sId}`);
+                let prevToolTip = null;
+                // Delete tool tip and return when same bar is clicked
+                if($("#timeTableToolTip").length){
+                    prevToolTip = super.getCoordinate("#timeTableToolTip");
+                    prevToolTip.y -= yToShift;
+                    $("#timeTableToolTip").remove();
+                    let xSame = (toolTipToDisplay.x === prevToolTip.x);
+                    let ySame = (toolTipToDisplay.y === prevToolTip.y);
+                    if((xSame && ySame))return;
+                }
+                // Create dom to append
+                let dom = $("<div></div>",
+                    {class: "timeTableToolTip",
+                        id: "timeTableToolTip"
+                    })
+                    .append(msg)
+                    .css({
+                        left : toolTipToDisplay.x,
+                        top : toolTipToDisplay.y + yToShift
+                    });
+                $(".TimeTable").append(dom);
+            }
+        });
     }
 }
