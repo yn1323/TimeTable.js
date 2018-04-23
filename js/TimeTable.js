@@ -207,7 +207,7 @@ Function to append time bar to created table
             let shape = this.can.drawLine(sId,eId,color,over);
             // Add mouse over Tooltip event
             let time = `${this.c.int2Time(s)}-${this.c.int2Time(e)}`;
-            this.can.addMouseOverTooltip(shape, time, sId);
+            this.can.addTooltipEvent(shape, time, sId,this.shiftTime);
         }
     }
     /**
@@ -912,8 +912,9 @@ class Canvas extends Calculation{
         this.cell = {};
         // Set stage for each object
         this.stage = null;
+        // To store shape and sId, eId for deleting data when delete bar.
+        this.stageId = {};
     }
-
     /**
     * Process needs to be done after Table is appeded to html
     */
@@ -921,6 +922,8 @@ class Canvas extends Calculation{
         this.measureCellSize();
         this.setCanvasTag();
         this.stage = new createjs.Stage(this.canvasSelector);
+        // For creating bar by drag&drop
+        this.stage.addEventListener("stagemousedown", this.handleDown);
     }
     /**
     * Measure cell size and set to constructor
@@ -982,6 +985,9 @@ class Canvas extends Calculation{
             .endStroke();
         this.stage.addChild(shape);
         this.stage.update();
+        this.stageId[shape] = {"startID": sId, "endID": eId};
+        console.log(sId, eId);
+        console.log(this.stageId[shape]);
         return shape;
     }
     /**
@@ -1050,35 +1056,50 @@ class Canvas extends Calculation{
     * @param  {str} msg    msg to display
     * @param  {obj} sId     Coordinate to display tool tip
     */
-    addMouseOverTooltip(select, msg, sId){
-        $(select).on({
-            "click":()=>{
-                // Shifting Pointing part of Tool tip
-                let yToShift = this.cell.height - 5;
-                // Coordinate of Tooltip to Display
-                let toolTipToDisplay = super.getCoordinate(`#${sId}`);
-                let prevToolTip = null;
-                // Delete tool tip and return when same bar is clicked
-                if($("#timeTableToolTip").length){
-                    prevToolTip = super.getCoordinate("#timeTableToolTip");
-                    prevToolTip.y -= yToShift;
-                    $("#timeTableToolTip").remove();
-                    let xSame = (toolTipToDisplay.x === prevToolTip.x);
-                    let ySame = (toolTipToDisplay.y === prevToolTip.y);
-                    if((xSame && ySame))return;
-                }
-                // Create dom to append
-                let dom = $("<div></div>",
-                    {class: "timeTableToolTip",
-                        id: "timeTableToolTip"
-                    })
-                    .append(msg)
-                    .css({
-                        left : toolTipToDisplay.x,
-                        top : toolTipToDisplay.y + yToShift
-                    });
-                $(".TimeTable").append(dom);
+    addTooltipEvent(shape, msg, sId, shift){
+        $(shape).on("click",()=>{
+            // Shifting Pointing part of Tool tip
+            let yToShift = this.cell.height - 5;
+            // Coordinate of Tooltip to Display
+            let toolTipToDisplay = super.getCoordinate(`#${sId}`);
+            let prevToolTip = null;
+            // Delete tool tip and return when same bar is clicked
+            if($("#timeTableToolTip").length){
+                prevToolTip = super.getCoordinate("#timeTableToolTip");
+                prevToolTip.y -= yToShift;
+                $("#timeTableToolTip").remove();
+                let xSame = (toolTipToDisplay.x === prevToolTip.x);
+                let ySame = (toolTipToDisplay.y === prevToolTip.y);
+                if((xSame && ySame))return;
             }
+            // Create dom to append
+            let dom = $("<div></div>",
+                {class: "timeTableToolTip",
+                    id: "timeTableToolTip"
+                })
+                .append(msg)
+                .css({
+                    left : toolTipToDisplay.x,
+                    top : toolTipToDisplay.y + yToShift
+                });
+            let deleteButton = $("<button class=\"toolTipDelete\">×</button>");
+            // Add Event to delete bar and also Tool tip
+            $(deleteButton).on("click",()=>{
+                this.stage.removeChild(shape);
+                $("#timeTableToolTip").remove();
+                $(shape).off("click");
+                this.stage.update();
+                //shift["501"] = "Jamson";
+                //console.log(shift);
+            });
+            $(dom).append(deleteButton);
+            $(".TimeTable").append(dom);
         });
+    }
+    deleteData(){
+
+    }
+    handleDown(){
+        console.log("a");
     }
 }

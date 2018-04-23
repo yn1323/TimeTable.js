@@ -92,3 +92,24 @@
   border-top:8px solid transparent;
   border-left:8px solid #258;
 }
+
+.toolTipDelete{
+    font-size: 15px;
+    position: relative;
+    display: block;
+    background: #258;
+    color: #ffffff;
+    border: none;
+    text-decoration: none;
+    text-align: center;
+    float: right;
+    background-color: #258;
+}
+.toolTipDelete:active{
+  -ms-transform: translateY(1px);
+  -webkit-transform: translateY(1px);
+  transform: translateY(1px);
+}
+.toolTipDelete:focus{
+    outline: none;
+}
