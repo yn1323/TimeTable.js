@@ -1,23 +1,21 @@
 module.exports = {
     "env": {
-        "es6": true,
         "browser": true,
+        "es6": true,
         "node": true,
-        "jQuery" : true
+        "jquery" : true
     },
     "globals": {
-        //"var1": true,
-        //"var2": false
-    }
-    "extends": "eslint:recommended",
-    "parserOptions": {
-        "sourceType": "module"
+        "TimeTable": true,
+        "stage": false,
+        "createjs": false
     },
+    "extends": "eslint:recommended",
     "rules": {
-        "no-console"        : "allow",
-        "indent"            : ["error","tab"],
-        "linebreak-style"   : ["error","windows"],
-        "quotes"            : ["error","double"],
-        "semi"              : ["error","always"]
-        }
-}
+        "no-console"      : ["error", { allow: ["warn", "error"] }],
+        "indent"          : ["error",4],
+        "linebreak-style" : ["error","windows"],
+        "quotes"          : ["error","double"],
+        "semi"            : ["error","always"]
+    }
+};
