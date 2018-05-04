@@ -1,4 +1,8 @@
 "use strict";
+
+function add(a,b){
+    return a + b;
+}
 // Main class for TimeTable.js
 class TimeTable{    // eslint-disable-line no-unused-vars
     constructor(data){

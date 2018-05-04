@@ -87,10 +87,17 @@ $(() => {
             }
         }
     };
-
+    /*
     // Call Time Table
     var instance = new TimeTable(obj);
     console.time("time"); // eslint-disable-line
     instance.init("#test");
     console.timeEnd("time");// eslint-disable-line
+    */
+
+    // Call Time Table
+    var instance2 = new TimeTable2(obj);
+    console.time("time2"); // eslint-disable-line
+    instance2.init("#test2");
+    console.timeEnd("time2");// eslint-disable-line
 });

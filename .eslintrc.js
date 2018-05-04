@@ -8,7 +8,11 @@ module.exports = {
     "globals": {
         "TimeTable": true,
         "stage": false,
-        "createjs": false
+        "createjs": false,
+        "describe": false,
+        "it": false,
+        "expect": false,
+        "jasmine": false
     },
     "extends": "eslint:recommended",
     "rules": {
