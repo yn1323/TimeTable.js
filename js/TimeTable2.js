@@ -1,4 +1,11 @@
 "use strict";
+let gVal = {};
+gVal.START_TIME = null;
+gVal.END_TIME = null;
+gVal.DIV_TIME = null;
+gVal.SHIFT = null;
+gVal.OPTION = null;
+gVal.SELECTOR = null;
 // Decare Utility class
 // Class for calculation
 class Calculation{
@@ -66,13 +73,13 @@ class Calculation{
     }
     /**
     * Count cells
-    * @param  {int} o   : openTime in parameter
-    * {int} c   : closeTime in parameter
+    * @param  {int} s   : openTime in parameter
+    * {int} e   : closeTime in parameter
     * {int} d   : divTime in parameter
     * @return {int} columns   : columns(cells) of Table
     */
     countColumns(s,e,d){
-        return (e - s) / d;
+        return Math.ceil((e - s) / d);
     }
 }
 // Class to manage messages
@@ -112,23 +119,45 @@ class Message{
         return this.ermsg;
     }
 }
-// Class to check validations
+// Setter & Getter of Global Variables
 class Validation extends Message{
+    constructor(){
+        super();
+        this.calc = new Calculation();
+    }
+    get startTime() {return gVal.START_TIME;}
+    set startTime(x){if(this.checkStartTime(x)) gVal.START_TIME = this.checkStartTime(x);}
+    get endTime  () {return gVal.END_TIME;}
+    set endTime  (x){if(this.checkEndTime  (x)) gVal.END_TIME   = this.checkEndTime(x);}
+    get divTime  () {return gVal.DIV_TIME;}
+    set divTime  (x){if(this.checkDivTime  (x)) gVal.DIV_TIME   = this.checkDivTime(x);}
+    get shiftTime() {return gVal.SHIFT;}
+    set shiftTime(x){if(this.checkShiftTime(x)) gVal.SHIFT      = this.checkShiftTime(x);}
+    get option   () {return gVal.OPTION;}
+    set option   (x){if(this.checkOption   (x)) gVal.OPTION     = this.checkOption(x);}
+    get selector () {return gVal.SELECTOR;}
+    set selector (x){gVal.SELECTOR = x;}
+    get coordinate () {return gVal.COORDINATE;}
+    set coordinate (x){gVal.COORDINATE = x;}
+    get table () {return gVal.TABLE;}
+    set table (x){gVal.TABLE = x;}
+    get selectbox () {return gVal.SELECTBOX;}
+    set selectbox (x){gVal.SELECTBOX = x;}
     /**
      * Check Existance of starttime, endtime, divtime
-     * @param  {String} oTime Opening Time
-     * @param  {String} cTime Closing Time
+     * @param  {String} sTime Starting Time
+     * @param  {String} eTime Ending Time
      * @param  {String} dTime Dividing Time
      * @return {boolean}
      */
-    checkExistance(oTime,cTime,dTime){
+    checkExistance(sTime,eTime,dTime){
         // flag to detect error(true: No error, false: Has error)
         let flg = true;
         try{
             // Check existance of startTime
-            if(oTime == null)throw new Error(this.ermsg["NO_STARTTIME"]);
+            if(sTime == null)throw new Error(this.ermsg["NO_STARTTIME"]);
             // Check existance of endTime
-            if(cTime == null)  throw new Error(this.ermsg["NO_ENDTIME"]);
+            if(eTime == null)  throw new Error(this.ermsg["NO_ENDTIME"]);
             // Check existance of endTime
             if(dTime == null)  throw new Error(this.ermsg["NO_DIVTIME"]);
         }catch(e){
@@ -139,18 +168,13 @@ class Validation extends Message{
     }
     /**
      * Convert Opening Time into int
-     * @param  {String} time OpeningTime (ex."10:00")
+     * @param  {String} time Starting Time (ex."10:00")
      * @return {int} intTime Time in int
      */
     checkStartTime(time){
         // Validation
         if(!this.timeValidation(time))return 0;
         let intTime = this.calc.time2Int(time);
-        // Only when required 24 hours time schedule
-        if(this.data["startTime"] === this.data["endTime"]){
-            intTime = 0;
-        }
-        this.START_TIME = intTime;
         return intTime;
     }
     /*
@@ -161,16 +185,11 @@ class Validation extends Message{
     checkEndTime(time){
         if(!this.timeValidation(time))return 0;
         let intTime = this.calc.time2Int(time);
-        // Only when required 24 hours time schedule
-        if(this.data["startTime"] === this.data["endTime"]){
-            intTime = 0;
-        }
-        // When schedule needs to set after 00:00.
-        if(this.START_TIME > intTime){
+        // When ending Time is after 00:00
+        if(this.startTime > intTime){
             // Add 24 hours converted as minute
             intTime += 1440;
         }
-        this.END_TIME = intTime;
         return intTime;
     }
     /*
@@ -181,7 +200,6 @@ class Validation extends Message{
     checkDivTime(divTime){
         if(!this.divTimeValidation(divTime))return 0;
         const intDivTime = parseInt(divTime,10);
-        this.DIV_TIME = intDivTime;
         return intDivTime;
     }
     /*
@@ -204,7 +222,7 @@ class Validation extends Message{
         // Set default value if there is no bgcolor option
         if(!option["selectBox"])option["selectBox"] = null;
         // Check each values;
-        if(!this.optionValidation(option)    )return null;
+        if(!this.optionValidation(option))return null;
         return option;
     }
     /*
@@ -397,8 +415,6 @@ class Validation extends Message{
             const obj = option["selectBox"];
             // Access to Key & Value
             for(let key in obj){
-                target = key;
-                if(typeof(target) !== "string")throw new Error(this.ermsg["STRING_DATA_TYPE"]);
                 target = obj[key];
                 if(typeof(target) !== "string")throw new Error(this.ermsg["STRING_DATA_TYPE"]);
             }
@@ -411,73 +427,33 @@ class Validation extends Message{
 }
 
 
-let v = new Validation();
-let gVal = {
-    get startTime() {return this.START_TIME;},
-    set startTime(x){if(v.checkStartTime(x)) this.START_TIME = v.checkStartTime(x);},
-    get endTime  () {return this.END_TIME;},
-    set endTime  (x){if(v.checkEndTime  (x)) this.END_TIME   = v.checkEndTime(x);},
-    get divTime  () {return this.DIV_TIME;},
-    set divTime  (x){if(v.checkDivTime  (x)) this.DIV_TIME   = v.checkDivTime(x);},
-    get shiftTime() {return this.SHIFT;},
-    set shiftTime(x){if(v.checkShiftTime(x)) this.SHIFT      = v.checkShiftTime(x);},
-    get option   () {return this.OPTION;},
-    set option   (x){if(v.checkOption   (x)) this.OPTION     = v.checkOption(x);},
-    get selector () {return this.SELECTOR;},
-    set selector (x){this.SELECTOR = x;},
-    get coordinate () {return this.COORDINATE;},
-    set coordinate (x){this.COORDINATE = x;},
-    get table () {return this.TABLE;},
-    set table (x){this.TABLE = x;},
-    get selectbox () {return this.SELECTBOX;},
-    set selectbox (x){this.SELECTBOX = x;},
-};
-let aaa = "hoge";
-
-/*
-get endTime  () {return this.END_TIME;}
-set endTime  (x){if(this.v.checkEndTime  (x)) this.END_TIME   = this.v.checkEndTime(x);}
-get divTime  () {return this.DIV_TIME;}
-set divTime  (x){if(this.v.checkDivTime  (x)) this.DIV_TIME   = this.v.checkDivTime(x);}
-get shiftTime() {return this.SHIFT;}
-set shiftTime(x){if(this.v.checkShiftTime(x)) this.SHIFT      = this.v.checkShiftTime(x);}
-get option   () {return this.OPTION;}
-set option   (x){if(this.v.checkOption   (x)) this.OPTION     = this.v.checkOption(x);}
-get selector () {return this.SELECTOR;}
-set selector (x){this.SELECTOR = x;}
-get coordinate () {return this.COORDINATE;}
-set coordinate (x){this.COORDINATE = x;}
-get table () {return this.TABLE;}
-set table (x){this.TABLE = x;}
-get selectbox () {return this.SELECTBOX;}
-set selectbox (x){this.SELECTBOX = x;}
-*/
-
 // Intial class to be called.
 class TimeTable2{    // eslint-disable-line no-unused-vars
     constructor(data){
+        let v = new Validation();
         // Flag for when this instance got error
         this.errFlg = true;
         // End if necessary parameter was missing
-        if(!v.checkExistance())return false;
-        this.startTime  = data["startTime"]; // Beginning Time
-        this.endTime    = data["endTime"];   // Endint Time
-        this.divTime    = data["divTime"];   // Unit to Divide time(minutes)
-        this.shiftTime  = data["shift"];     // Time Table Data
-        this.option     = data["option"];     // Other option
+        if(!v.checkExistance(
+            data["startTime"],
+            data["endTime"],
+            data["divTime"])
+        )return false;
+        v.startTime  = data["startTime"]; // Beginning Time
+        v.endTime    = data["endTime"];   // Endint Time
+        v.divTime    = data["divTime"];   // Unit to Divide time(minutes)
+        v.shiftTime  = data["shift"];     // Time Table Data[
+        v.option     = data["option"];     // Other option
         // For final check of values
         let arr = [
-            this.startTime,
-            this.endTime,
-            this.divTime,
-            this.shiftTime,
-            this.option
+            gVal.startTime,
+            gVal.endTime,
+            gVal.divTime,
+            gVal.shiftTime,
+            gVal.option
         ];
+
         // End if there was error in any parameter
-        if(!this.v.checkUndefinedArray(arr)){
-            // Error Flag for when this NEW has been failed.
-            this.errFlg = false;
-            return false;
-        }
+        if(!v.checkUndefinedArray(arr))return false;
     }
 }
