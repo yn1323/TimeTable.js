@@ -81,6 +81,33 @@ class Calculation{
     countColumns(s,e,d){
         return Math.ceil((e - s) / d);
     }
+    /*
+    Get index in shift object
+    @param  {obj}   shift : shift object
+    @return {array} index : Array of index
+    */
+    getIndex(shift){
+        return Object.keys(shift);
+    }
+    /*
+    Get names in shift object
+    @param  {obj}   shift : shift object
+    @return {array} names : Array of names
+    */
+    getNames(shift){
+        let names = [];
+        // Access to Object rooted to Index Key
+        for(let key in shift){
+            let indexObj = shift[key];
+            // Access to Object rooted to Name Key
+            for(let name in indexObj){
+                let nameStr = name;
+                names.push(nameStr);
+            }
+        }
+        return names;
+    }
+
 }
 // Class to manage messages
 class Message{
@@ -531,38 +558,206 @@ class Utils{
 // Intial class to be called.
 class TimeTable2{    // eslint-disable-line no-unused-vars
     constructor(data){
-        let v = new Validation();
+        this.v = new Validation();
+        this.c = new Calculation();
         // Flag for when this instance got error
         this.errFlg = true;
         // End if necessary parameter was missing
-        if(!v.checkExistance(
+        if(!this.v.checkExistance(
             data["startTime"],
             data["endTime"],
             data["divTime"])
-        )return false;
-        v.startTime  = data["startTime"]; // Beginning Time
-        v.endTime    = data["endTime"];   // Endint Time
-        v.divTime    = data["divTime"];   // Unit to Divide time(minutes)
-        v.shiftTime  = data["shift"];     // Time Table Data
-        v.option     = data["option"];     // Other option
+        ){
+            this.errFlg = false;
+            return false;
+        }
+        this.v.startTime  = data["startTime"]; // Beginning Time
+        this.v.endTime    = data["endTime"];   // Endint Time
+        this.v.divTime    = data["divTime"];   // Unit to Divide time(minutes)
+        this.v.shiftTime  = data["shift"];     // Time Table Data
+        this.v.option     = data["option"];     // Other option
         // For final check of values
         let arr = [
-            gVal.startTime,
-            gVal.endTime,
-            gVal.divTime,
-            gVal.shiftTime,
-            gVal.option
+            this.v.startTime,
+            this.v.endTime,
+            this.v.divTime,
+            this.v.shiftTime,
+            this.v.option
         ];
         // End if there was error in any parameter
-        if(!v.checkUndefinedArray(arr))return false;
+        if(!this.v.checkUndefinedArray(arr)){
+            this.errFlg = false;
+            return false;
+        }
+        // Create Select box and store as constructor
+        if(this.v.option["selectBox"]){
+            this.selectBox = $(this.createSelectBox(this.v.option["selectBox"]));
+        }
 
     }
-    /**
-     * Initial Function to be called
-     * @return {[type]} [description]
-     */
-    init(){
+    /*
+    To Create TimeTable
+    @param  {selector} id : Selector has to be ID
+    @return {boolean}  true  : No Error.
+    false : Has Error.
+    */
+    init(sel){
+        // Not to proceed process when there was error
+        if(!this.errFlg)return false;
+        // Set as Constructor
+        this.v.selector = sel;
+        // Set Table
+        this.createTable();
+        // Set options
+        if(this.v.option["workTime"])this.setWorkTimeColumn();
 
+    }
+    /*
+    Create Table for append document.
+    */
+    createTable(){
+        let base = $("<table>",{class: "TimeTable",id: "TimeTable"});
+        // Create Header
+        base = this.createTableHeader(base);
+        // Create Data
+        base = this.createTableData(base);
+        // Set 1st column(name)
+        base = this.addFirstColumn(base);
+        this.table = base;
+    }
+    /*
+    Create Table header for append document.
+    @param   {dom} base : Only Table tag is included
+    @reaturm {dom} base : Table tag and header tags are included
+    */
+    createTableHeader(base){
+        let tr = $("<tr></tr>", {class: "theader", id: "theader"});
+        // Always Header will be --:00.
+        let colspan = 60 / this.v.divTime;
+        // Column of Time(Name column is not included)
+        const COLUMNS = this.c.countColumns(this.v.startTime, this.v.endTime, this.v.divTime);
+        let startTime = this.v.startTime;
+        // Create Table Header
+        for(let i = 0; i < COLUMNS; i++){
+            // Convert time
+            let thTime = this.c.int2Time(startTime + i * this.v.divTime);
+            // Skip if time is NOT --:00
+            if((startTime + i * this.v.divTime) % 60 != 0){continue;}
+            tr.append($(`<th colspan = ${colspan}>${thTime}</th>`));
+        }
+        base = base.append(tr);
+        return base;
+    }
+    /*
+    Create Table header for append document.
+    @param {dom} base : Table tag include header
+    @return {dom} base : Table tag include header and data
+    */
+    createTableData(base){
+        const COLUMNS = this.c.countColumns(this.v.startTime, this.v.endTime, this.v.divTime);
+        const NUMSHIFT = this.c.getNames(this.v.shiftTime).length;
+        // Add as id
+        const INDEX = this.c.getIndex(this.v.shiftTime);
+        // Loop for number of shift(rows)
+        for(let i = 0; i < NUMSHIFT; i++){
+            // Loop for time cells(columns)
+            let tr = $("<tr></tr>", {id: `name-${INDEX[i]}`, class: "js-tdata"});
+            for(let j = 0; j < COLUMNS; j++){
+                let timeAttr =  this.v.startTime + this.v.divTime * j;
+                let td = $("<td></td>");
+                // Set id for getting coordinate
+                td.attr("id", `${i}-${j}`);
+                td.attr("time", timeAttr);
+                tr.append(td);
+            }
+            base.append(tr);
+        }
+        return base;
+    }
+    /*
+    Add First Column
+    @param {dom} base : Table tag include header and data
+    @return {dom} base : Table tag include name column
+    */
+    addFirstColumn(base){
+        const NAMES = this.c.getNames(this.v.shiftTime);
+        // id for find
+        const INDEX = this.c.getIndex(this.v.shiftTime);
+        // Column of Header
+        base.find("#theader").prepend("<th>NAME</th>");
+        // Column of Data
+        for(let i = 0; i < NAMES.length; i ++){
+            let td = base.find(`#name-${INDEX[i]}`);
+            let element = "";
+            // Different whether select box option exist
+            if(this.v.option["selectBox"]){
+                // Required to create selecttag as string (Why?)
+                let select = this.createSelectBox_old(INDEX[i],NAMES[i]);
+                element = (`<td>${select}</td>`);
+                //console.log(toString(this.selectbox));
+            }else{
+                element = (`<td>${NAMES[i]}</td>`);
+            }
+            td.prepend($(element));
+        }
+        return base;
+    }
+    /**
+    * createSelectBox -- Had to create as string to append select box
+    * TODO: Create Select box as dom
+    * @param {object} object in option of "selectBox"
+    * @return {str}  select box tags;
+    */
+    createSelectBox(obj){
+        let selectTag = "<select class=\"timeTableSelectbox\">";
+        let str = "";
+        for(let i in obj){
+            str += `<option value="${i}">${obj[i]}</option>`;
+        }
+        selectTag = selectTag + str + "</select>";
+        return selectTag;
+    }
+    createSelectBox_old(index,name){
+        let selectTag = "<select class=\"timeTableSelectbox\">";
+        let str = "";
+        let obj = this.v.option["selectBox"];
+        let matchFlg = false;
+        for(let i in obj){
+            if(i !== index){
+                str += `<option value="${i}">${obj[i]}</option>`;
+            }else{
+                // Even shift name and selectBox name did not match,
+                // set shift name
+                str += `<option value="${i}" selected>${name}</option>`;
+                matchFlg = true;
+            }
+        }
+        // Shift index did not match with selectBox index
+        if(!matchFlg){
+            str += `<option value="${index}" selected>${name}</option>`;
+        }
+        selectTag = selectTag + str + "</select>";
+        return selectTag;
+    }
+    /**
+    * setWorkTimeColumn - description
+    */
+    setWorkTimeColumn(){
+        let header = this.table.find("#theader");
+        header.append("<th>‡ŒvŽžŠÔ</th>");
+        let tbody = this.table.find(".js-tdata");
+        if(!this.v.option["selectBox"]){
+            tbody.each((i,elem)=>{
+                let time = this.c.getTotalShiftTime($(elem).attr("id"),this.shiftTime);
+                $(elem).append(`<td class="workTime">${time}</td>`);
+            });
+        }else{
+            tbody.each((i,elem)=>{
+                let selected = $(elem).find(".timeTableSelectbox option:selected").attr("value");
+                let time = this.c.getTotalShiftTime(selected, this.shiftTime);
+                $(elem).append(`<td class="workTime">${time}</td>`);
+            });
+        }
     }
 }
 
