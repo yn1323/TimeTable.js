@@ -96,7 +96,7 @@ $(() => {
     */
 
     // Call Time Table
-    var instance2 = new TimeTable2(obj);
+    var instance2 = new TimeTable(obj);
     console.time("time2"); // eslint-disable-line
     instance2.init("#test2");
     console.timeEnd("time2");// eslint-disable-line

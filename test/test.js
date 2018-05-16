@@ -414,3 +414,19 @@ describe("class Validation",()=>{
         });
     });
 });
+describe("class TimeTable2",()=>{
+    let t = new TimeTable2();    // eslint-disable-line
+    describe("createSelectBox()",()=>{
+        it("Select Box object return Selectbox tag as String", ()=>{
+            let obj = {
+                selectBox: {
+                    "2" : "Jason Paige",
+                    "3" : "Mr.Jason",
+                    "25" : "Mrs.Jason"
+                }
+            };
+            let correct = "<select class=\"timeTableSelectbox\"><option value=\"2\">Jason Paige</option><option value=\"3\">Mr.Jason</option><option value=\"25\">Mrs.Jason</option></select>";
+            expect(t.createSelectBox(obj["selectBox"])).toBe(correct);
+        });
+    });
+});
