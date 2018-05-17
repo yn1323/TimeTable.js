@@ -175,11 +175,11 @@ class Calculation{
         return obj;
     }
     /**
-     * getIndexFromStartId - To configure id from coordinate of Bar starting dom.
-     *
-     * @param{str} sId
-     * @return {str}  index
-     */
+    * getIndexFromStartId - To configure id from coordinate of Bar starting dom.
+    *
+    * @param{str} sId
+    * @return {str}  index
+    */
     getIndexFromStartId(sId){
         let index = "";
         let row = $(`#${sId}`).siblings();
@@ -679,10 +679,72 @@ class Util extends Calculation{
         obj.y = rect.top + window.pageYOffset;
         return obj;
     }
+    /**
+    * Get absolute coordinate
+    * @param {event} event
+    * @return {obj} obj : contais aboslute coordinate
+    */
+    getCoordinateByClick(event){
+        let obj = {};
+        obj.x = event.clientX;
+        obj.y = event.clientY;
+        return obj;
+    }
+    /**
+    * Find Nearest Element From Coordinate
+    * @param  {obj} obj : enmpty object
+    * @param  {obj} cell : object contains cell size
+    * @param  {obj} coordinate : object contains clicked coordinate
+    * @return {obj} obj : object contains data-nameid and data-time
+    * @return {str} : data-time
+    */
+    findNearestElementByCoordinate(obj, cell, clickedCoordinate){
+        //let hasObj = false;
+        $(".js-tdata").each((i,elem)=>{
+            let dom = $(elem).children();
+            for(let i = 0; i < dom.length; i++){
+                if(i === 0)continue;
+                let target = $(dom[i]);
+                let startCoordinate = this.getCoordinateFromSelector($(target));
+                let endCoordinate = {};
+                endCoordinate.x = startCoordinate.x + cell.width;
+                endCoordinate.y = startCoordinate.y + cell.height;
+                // Recognize clicked cell's top left coordinate is nearest
+                let xPos = (clickedCoordinate.x >= startCoordinate.x && clickedCoordinate.x <= endCoordinate.x);
+                let yPos = (clickedCoordinate.y >= startCoordinate.y && clickedCoordinate.y <= endCoordinate.y);
+                if(xPos&&yPos){
+                    obj.x = startCoordinate.x;
+                    obj.y = startCoordinate.y;
+                    obj.time = $(target).attr("data-time");
+                    obj.index = $(target).attr("data-nameid");
+                    return obj;
+                }
+            }
+        });
+        return obj;
+    }
+    /**
+     * Get Id From Y Coordinate
+     * @param  {obj} cell object contains cell size
+     * @param  {int} y    y coordinate
+     * @return {int} index index of name id
+     */
+    getIdFromYCoordinate(cell,y){
+        let index = null;
+        $(".js-tdata").each((i,elem)=>{
+            let dom = $(elem);
+            let start = this.getCoordinateFromSelector(dom).y;
+            let end = start + cell.height;
+            if(y >= start && y <= end){
+                index = $(dom).attr("id");
+            }
+        });
+        return index;
+    }
 }
 
 // Intial class to be called.
-class TimeTable2{    // eslint-disable-line no-unused-vars
+class TimeTable{    // eslint-disable-line no-unused-vars
     constructor(data){
         this.v = new Validation();
         this.c = new Calculation();
@@ -830,11 +892,11 @@ class TimeTable2{    // eslint-disable-line no-unused-vars
         return base;
     }
     /**
-     * [createSelectBox description]
-     * @param  {str} index [description]
-     * @param  {str} name  [description]
-     * @return {dom} selectTag
-     */
+    * [createSelectBox description]
+    * @param  {str} index [description]
+    * @param  {str} name  [description]
+    * @return {dom} selectTag
+    */
     createSelectBox(index,name){
         let selectTag = "<select class=\"timeTableSelectbox\">";
         let str = "";
@@ -913,6 +975,12 @@ class Canvas extends Calculation{
         this.stage = null;
         // To store shape and sId, eId for deleting data when delete bar.
         this.stageId = {};
+        // Start coordinate of creating bar by Drag&Drop
+        this.startCoordinate = {};
+        // End coordinate of creating bar by Drag&Drop
+        this.endCoordinate = {};
+        // Temporary shape when creating bar by Drag&Drop
+        this.tempShape = null;
     }
     /**
     * Process needs to be done after Table is appeded to html
@@ -962,8 +1030,8 @@ class Canvas extends Calculation{
         this.canvasSelector = $("#timeBar").get(0);
     }
     /**
-     * Draw Initial bar
-     */
+    * Draw Initial bar
+    */
     initialDraw(){
         let timeData = super.getIndexAndTime(this.v.shiftTime);
         let gen = this.u.colorTimeGenerator(timeData);
@@ -980,13 +1048,14 @@ class Canvas extends Calculation{
             let startCoordinate = this.u.getCoordinateFromCustomAttribute(index,s);
             this.addTooltipEvent(shape, index, time, startCoordinate);
         }
+        this.addCreateBarEvent();
     }
     /**
-     * [setDrawParameter description]
-     * @param {str} index name index
-     * @param {str} s     start time (data-time)
-     * @param {str} e     end time (data-time)
-     */
+    * [setDrawParameter description]
+    * @param {str} index name index
+    * @param {str} s     start time (data-time)
+    * @param {str} e     end time (data-time)
+    */
     setDrawParameter(index,s,e){
         // Get id of dom which will plot start time and end time
         let [sTime,eTime] = this.u.searchNearestDom(index,s,e);
@@ -1016,6 +1085,8 @@ class Canvas extends Calculation{
         let shape = new createjs.Shape().set({
             name:`{${index}:{"start":${sTime},"end":${eTime}}`
         });
+        //console.log(sc);
+        //console.log(ec);
         shape.graphics
             .setStrokeStyle(10)
             .beginStroke(barColor)
@@ -1080,7 +1151,6 @@ class Canvas extends Calculation{
         $("body").prepend(canvas);
         let element = $("#debugdot").get(0);
         var ctx = element.getContext("2d");
-        // 繝代せ繧偵Μ繧ｻ繝�繝�
         ctx.beginPath () ;
         ctx.fillStyle = "red";
         ctx.fillRect(x, y, 2, 2);
@@ -1095,7 +1165,7 @@ class Canvas extends Calculation{
     * @param  {obj} shift   To change shift object when deleting bar
     */
     addTooltipEvent(shape, index, time, sc){
-        $(shape).on("click",()=>{
+        $(shape).on("click", ()=>{
             // Shifting Pointing part of Tool tip
             let yToMove = this.cell.height - 5;
             // Coordinate of Tooltip to Display
@@ -1122,7 +1192,7 @@ class Canvas extends Calculation{
                 });
             let deleteButton = $("<button class=\"toolTipDelete\">x</button>");
             // Add Event to delete bar and also Tool tip
-            $(deleteButton).on("click",()=>{
+            $(deleteButton).on("click", ()=>{
                 this.stage.removeChild(shape);
                 $("#timeTableToolTip").remove();
                 $(shape).off("click");
@@ -1132,6 +1202,42 @@ class Canvas extends Calculation{
             $(dom).append(deleteButton);
             $(".TimeTable").append(dom);
         });
+    }
+    /**
+     * Add event to create Bar
+     */
+    addCreateBarEvent(){
+        $("#timeBar").on({
+            "mousedown": ()=>{
+                // Decide starting place and index
+                let start = this.u.getCoordinateByClick(event);
+                this.startCoordinate = this.u.findNearestElementByCoordinate(this.startCoordinate, this.cell, start);
+                $("#timeBar").on("mousemove",()=>{
+                    let end = this.u.getCoordinateByClick(event);
+                    this.endCoordinate = this.u.findNearestElementByCoordinate(this.endCoordinate, this.cell, end);
+                    // Decide ending place during drag
+                    this.addBarByClick();
+                });
+            },
+            "mouseup": ()=>{
+                $("#timeBar").off("mousemove");
+            },
+        });
+        // When dropping outside of canvas.
+        $(document).on("mouseup", ()=>$("#timeBar").off("mousemove"));
+    }
+    addBarByClick(){
+        if(this.tempShape){
+            this.stage.removeChild(this.tempShape);
+            this.stage.update();
+        }
+        this.tempShape = this.drawLine(
+            this.startCoordinate.index,
+            parseInt(this.startCoordinate.time,10),
+            parseInt(this.endCoordinate.time,10),
+            "1",
+            true
+        );
     }
     /**
     * deleteShiftData
