@@ -1,3 +1,14 @@
+:root{
+    /*--rgbBase: 0, 146, 80;/* Deep Green */
+    /* Comment out sample colors */
+    /*--rgbBase: 34, 85, 136;/* Blue */
+    /*--rgbBase: 62, 186, 43;/* Lime Green */
+    --rgbBase: 218, 80, 25;/* Orange */
+    --rgbBaseFont: 50, 50, 50;
+    --rgbHeaderFont: 255, 255, 255;
+    --rgbRow: 255, 255, 255;
+}
+
 .TimeTable{
     border-spacing: 0;
     font-size: 14px;
@@ -6,83 +17,67 @@
 }
 
 .TimeTable th{
-    background: #225588;
-    background: -moz-linear-gradient(rgba(34, 85, 136, .7), rgba(34, 85, 136, .9) 50%);
-    background: -webkit-gradient(linear, 100% 0%, 100% 50%, from(rgba(34, 85, 136, .7)), to(rgba(34, 85, 136, .9)));
-    border-bottom: 1px solid #225588;
-    border-left: 1px solid #225588;
-    border-top: 1px solid #225588;
-    box-shadow: 0 1px 1px rgba(255, 255, 255, .3) inset;
-    color: #ffffff;
+    background: rgba(var(--rgbBase), 1);
+    background: -moz-linear-gradient(rgba(var(--rgbBase), 0.7), rgba(var(--rgbBase), 0.9) 50%);
+    background: -webkit-gradient(linear, 100% 0%, 100% 50%, from(rgba(var(--rgbBase), 0.7)), to(rgba(var(--rgbBase), 0.9)));
+    border-bottom: 1px solid rgba(var(--rgbBase), 1);
+    border-left: 1px solid rgba(var(--rgbBase), 1);
+    border-top: 1px solid rgba(var(--rgbBase), 1);
+    color: rgba(var(--rgbHeaderFont), 1);
     font-weight: bold;
-    line-height: 120%;
+    line-height: 1.2;
     padding: 8px 15px;
     text-align: center;
-    text-shadow: 0 -1px 0 rgba(34, 85, 136, .9);
-}
-
-.TimeTable th:first-child{
-    border-radius: 5px 0 0 0;
 }
 
 .TimeTable th:last-child{
-    border-radius: 0 5px 0 0;
-    border-right: 1px solid #225588;
-    box-shadow: 2px 2px 1px rgba(0, 0, 0, .1), 0 1px 1px rgba(255, 255, 255, .3) inset;
+    border-right: 1px solid rgba(var(--rgbBase), 1);
+}
+.TimeTable td:last-child{
+    border-right: 1px solid rgba(var(--rgbBase), 0.5);
 }
 
 .TimeTable tr td{
-    border-bottom: 1px solid #84b2e0;
-    border-left: 1px solid #84b2e0;
-    padding: 8px 15px;
+    border-bottom: 1px solid rgba(var(--rgbBase), 0.5);
+    border-left: 1px solid rgba(var(--rgbBase), 0.5);
+    height: 30px;
+}
+
+.TimeTable__row{
+    background: rgba(var(--rgbRow), 1);
+    color: rgba(var(--rgbBaseFont), 1);
+    max-width: 200px;
     text-align: center;
 }
-
-.TimeTable tr td:last-child{
-    border-right: 1px solid #84b2e0;
-    box-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+.TimeTable__row:nth-child(2n+1){
+    background: rgba(var(--rgbBase), 0.1);
+}
+.TimeTable__row:hover{
+    background: rgba(var(--rgbBase), 0.3);
 }
 
-.TimeTable tr{
-    background: #ffffff;
-}
-
-.TimeTable tr:nth-child(2n+1){
-    background: #f1f6fc;
-}
-
-.TimeTable tr:last-child td{
-    box-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
-}
-
-.TimeTable tr:last-child td:first-child{
-    border-radius: 0 0 0 5px;
-}
-
-.TimeTable tr:last-child td:last-child{
-    border-radius: 0 0 5px 0;
-}
-
-.TimeTable tr:hover{
-    background: #bbd4ee;
+.TimeTable__worktime{
+    text-align: center;
 }
 
 .timeTableSelectbox{
     background-color: inherit;
     border: none;
+    color: rgba(var(--rgbBaseFont), 1);
+    height: 100%;
 }
 
 .timeTableToolTip{
-    background: #225588;
+    background: rgba(var(--rgbBase), 1);
     border-radius: 8px;
-    color: #ffffff;
+    color: rgba(var(--rgbHeaderFont), 1);
     padding: 4px 8px;
     position: absolute;
     z-index: 9999;
 }
 
 .timeTableToolTip:after{
-    border-left: 8px solid #225588;
+    border-left: 8px solid rgba(var(--rgbBase), 1);
     border-top: 8px solid transparent;
     content: "";
     display: block;
@@ -93,16 +88,13 @@
 }
 
 .toolTipDelete{
-    background-color: #225588;
-    background: #225588;
+    background-color: rgba(var(--rgbBase), 1);
+    background: rgba(var(--rgbBase), 1);
     border: none;
-    color: #ffffff;
-    display: block;
+    color: rgba(var(--rgbHeaderFont), 1);
     float: right;
     font-size: 15px;
     position: relative;
-    text-align: center;
-    text-decoration: none;
 }
 
 .toolTipDelete:active{

@@ -849,7 +849,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         for(let i = 0; i < NUMSHIFT; i++){
             // Loop for time cells(columns)
             let nameId = INDEX[i];
-            let tr = $("<tr></tr>", {id: nameId , class: "js-tdata"});
+            let tr = $("<tr></tr>", {id: nameId , class: "js-tdata TimeTable__row"});
             for(let j = 0; j < COLUMNS; j++){
                 let timeAttr =  this.v.startTime + this.v.divTime * j;
                 let td = $("<td></td>");
@@ -935,7 +935,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
                 target = $(elem).attr("data-nameId");
             }
             let time = this.c.getTotalShiftTime(target, this.v.shiftTime);
-            $(elem).append(`<td class="workTime">${time}</td>`);
+            $(elem).append(`<td class="TimeTable__worktime">${time}</td>`);
         });
     }
 }
@@ -1134,7 +1134,7 @@ class Canvas extends Calculation{
         sc.y += middle;
         ec.y += middle;
         // When over or reach to last cell.
-        if(over){ec.x += this.cell.width + 1;}
+        if(over){ec.x += this.cell.width;}
         return [sc,ec];
     }
     debugDot(x,y){
@@ -1216,7 +1216,10 @@ class Canvas extends Calculation{
                     let end = this.u.getCoordinateByClick(event);
                     this.endCoordinate = this.u.findNearestElementByCoordinate(this.endCoordinate, this.cell, end);
                     // Decide ending place during drag
-                    this.addBarByClick();
+                    // Execute only drag more than width of cell.
+                    if(Math.abs(this.startCoordinate.x - this.endCoordinate.x) >= this.cell.width / 4){
+                        this.addBarByClick();
+                    }
                 });
             },
             "mouseup": ()=>{
