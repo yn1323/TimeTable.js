@@ -193,6 +193,22 @@ class Calculation{
         }
         return index;
     }
+    /**
+     * getNameFromId
+     * @param  {int} Id
+     * @return {str}  name
+     */
+    getNameFromId(Id){
+        let shift = this.v.shiftTime;
+        let name = Object.keys(shift[Id]).join("");
+        // Search Also Select Box
+        if(!name){
+            let option = this.v.option;
+            let obj = option["selectBox"];
+            name = Object.keys(obj[Id]).join("");
+        }
+        return name;
+    }
 }
 // Class to manage messages
 class Message{
@@ -715,6 +731,7 @@ class Util extends Calculation{
                 if(xPos&&yPos){
                     obj.y = startCoordinate.y;
                     obj.index = $(target).attr("data-nameid");
+
                     // Compare start position left or right
                     if(Math.abs(startCoordinate.x - clickedCoordinate.x) < Math.abs(endCoordinate.x - clickedCoordinate.x)){
                         obj.x = startCoordinate.x;
@@ -1159,7 +1176,6 @@ class Canvas extends Calculation{
     */
     addTooltipEvent(shape, index, time, sc){
         $(shape).on("click", ()=>{
-            console.log("#");
             // Shifting Pointing part of Tool tip
             let yToMove = this.cell.height - 5;
             // Coordinate of Tooltip to Display
@@ -1191,7 +1207,6 @@ class Canvas extends Calculation{
                 $("#timeTableToolTip").remove();
                 $(shape).off("click");
                 this.deleteShiftData(time, index);
-                console.log("deleting...");
                 this.stage.update();
             });
             $(dom).append(deleteButton);
@@ -1211,41 +1226,54 @@ class Canvas extends Calculation{
                         // Decide starting place and index
                         let start = this.u.getCoordinateByClick(event);
                         this.startCoordinate = this.u.findNearestElementByCoordinate(this.startCoordinate, this.cell, start);
+                        $("#timeBar").on("mouseup",()=>{
+                            $("#timeBar").off("mousemove");
+                            $("#timeBar").off("mouseup");
+                            // Delete Temporary Bar
+                            if(this.tempShape){
+                                this.stage.removeChild(this.tempShape);
+                                this.stage.update();
+                            }
+                            // Redraw Bar for not to delete when again drag & drop
+                            let sTime = parseInt(this.startCoordinate.time,10);
+                            let eTime = parseInt(this.endCoordinate.time,10);
+                            // Switch Time if drag & drop from left to right
+                            if(sTime > eTime){
+                                let temp = this.startCoordinate;
+                                this.startCoordinate = this.endCoordinate;
+                                this.endCoordinate = temp;
+                                sTime = parseInt(this.startCoordinate.time,10);
+                                eTime = parseInt(this.endCoordinate.time,10);
+                            }
+                            let color = Math.floor(Math.random() * Math.floor(10));
+                            // Draw confirmed line
+                            let shape = this.drawLine(
+                                this.startCoordinate.index,
+                                sTime,
+                                eTime,
+                                color,
+                                this.endCoordinate.over
+                            );
+                            // Actual time to display in Tooltip
+                            if(this.endCoordinate.over){
+                                eTime += parseInt(this.v.divTime,10);
+                            }
+                            // Add mouse over Tooltip event
+                            let time = "";
+                            let coordinate = {};
+                            // Drag left to right
+                            time = `${super.int2Time(sTime)}-${super.int2Time(eTime)}`;
+                            coordinate.x = this.startCoordinate.x;
+                            coordinate.y = this.startCoordinate.y;
+                            this.addTooltipEvent(shape, this.startCoordinate.index, time, coordinate);
+                            this.addShiftData();
+                        });
                         startFlg = true;
                     }
                     let end = this.u.getCoordinateByClick(event);
                     this.endCoordinate = this.u.findNearestElementByCoordinate(this.endCoordinate, this.cell, end);
                     this.addBarByClick();
                 });
-            },
-            "mouseup": ()=>{
-                console.log("uped");
-                $("#timeBar").off("mousemove");
-                // Delete Temporary Bar
-                if(this.tempShape){
-                    this.stage.removeChild(this.tempShape);
-                    this.stage.update();
-                }
-                // Redraw Bar for not to delete when again drag & drop
-                let sTime = parseInt(this.startCoordinate.time,10);
-                let eTime = parseInt(this.endCoordinate.time,10);
-                if(this.endCoordinate.over){
-                    eTime += eTime + this.v.divTime;
-                }
-                let color = Math.floor(Math.random() * Math.floor(10));
-                let shape = this.drawLine(
-                    this.startCoordinate.index,
-                    sTime,
-                    eTime,
-                    color,
-                    this.endCoordinate.over
-                );
-                // Add mouse over Tooltip event
-                let time = `${super.int2Time(sTime)}-${super.int2Time(eTime)}`;
-                let coordinate = {};
-                coordinate.x = this.startCoordinate.x;
-                coordinate.y = this.startCoordinate.y;
-                this.addTooltipEvent(shape, this.startCoordinate.index, time, coordinate);
             }
         });
         // When dropping outside of canvas.
@@ -1259,12 +1287,19 @@ class Canvas extends Calculation{
             this.stage.removeChild(this.tempShape);
             this.stage.update();
         }
+        let start = this.startCoordinate;
+        let end = this.endCoordinate;
+        // Switch Time if drag & drop from left to right
+        if(parseInt(this.startCoordinate.time,10) > parseInt(this.endCoordinate.time,10)){
+            start = this.endCoordinate;
+            end = this.startCoordinate;
+        }
         this.tempShape = this.drawLine(
-            this.startCoordinate.index,
-            parseInt(this.startCoordinate.time,10),
-            parseInt(this.endCoordinate.time,10),
+            start.index,
+            parseInt(start.time,10),
+            parseInt(end.time,10),
             "1",
-            this.endCoordinate.over
+            end.over
         );
     }
     /**
@@ -1308,8 +1343,20 @@ class Canvas extends Calculation{
     * @param  {str} sId  To identify the row.
     * @param  {object} shift  Object of shift to modify
     */
-    addShiftData(start, end){
-        let index = start.index;
+    addShiftData(){
+        let index = this.startCoordinate.index;
+        let sTime = super.int2Time(this.startCoordinate.time);
+        let eTime = "";
+        if(!this.endCoordinate.over){
+            eTime = super.int2Time(this.endCoordinate.time);
+        }else{
+            let temp = parseInt(this.endCoordinate.time,10);
+            eTime = super.int2Time(temp);
+        }
+        let name = super.getNameFromId(index);
         console.log(index);
+        console.log(sTime);
+        console.log(eTime);
+        console.log(name);
     }
 }

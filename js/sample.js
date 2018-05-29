@@ -69,7 +69,7 @@ $(() => {
         // Ending Time
         endTime: "20:00",
         // Time to divide(minute)
-        divTime: "30",
+        divTime: "15",
         // Time Table
         shift: shiftObj,
         // Other options
