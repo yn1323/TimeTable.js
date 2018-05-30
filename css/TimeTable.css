@@ -11,6 +11,7 @@
 
 .TimeTable{
     border-spacing: 0;
+    cursor: default;
     font-size: 14px;
     white-space: nowrap;
     width: auto;

@@ -200,14 +200,31 @@ class Calculation{
      */
     getNameFromId(Id){
         let shift = this.v.shiftTime;
-        let name = Object.keys(shift[Id]).join("");
+        let name = "";
         // Search Also Select Box
-        if(!name){
-            let option = this.v.option;
-            let obj = option["selectBox"];
-            name = Object.keys(obj[Id]).join("");
+        if(shift[Id]){
+            name = Object.keys(shift[Id]).join("");
+        }else{
+            let selectBoxNames = this.v.option["selectBox"];
+            name =  selectBoxNames[Id];
         }
         return name;
+    }
+    /**
+     * [refreshWorkTime description]
+     */
+    refreshWorkTime(){
+        let tbody = $("#TimeTable").find(".js-tdata");
+        tbody.each((i,elem)=>{
+            let target = "";
+            if(this.v.option["selectBox"]){
+                target = $(elem).find(".timeTableSelectbox option:selected").attr("value");
+            }else{
+                target = $(elem).attr("id");
+            }
+            let time = this.getTotalShiftTime(target, this.v.shiftTime);
+            $(elem).find(".js-workTime").html(time);
+        });
     }
 }
 // Class to manage messages
@@ -731,7 +748,6 @@ class Util extends Calculation{
                 if(xPos&&yPos){
                     obj.y = startCoordinate.y;
                     obj.index = $(target).attr("data-nameid");
-
                     // Compare start position left or right
                     if(Math.abs(startCoordinate.x - clickedCoordinate.x) < Math.abs(endCoordinate.x - clickedCoordinate.x)){
                         obj.x = startCoordinate.x;
@@ -827,6 +843,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         // Set options
         if(this.v.option["workTime"])this.setWorkTimeColumn();
         $(sel).append(this.table);
+        if(this.v.option["selectBox"])this.changeNameId();
         // Draw Chart
         this.can.init();
     }
@@ -929,7 +946,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
     * @return {dom} selectTag
     */
     createSelectBox(index,name){
-        let selectTag = "<select class=\"timeTableSelectbox\">";
+        let selectTag = "<select class=\"timeTableSelectbox js-timeSelectBox\">";
         let str = "";
         let obj = this.v.option["selectBox"];
         let matchFlg = false;
@@ -963,10 +980,43 @@ class TimeTable{    // eslint-disable-line no-unused-vars
             if(this.v.option["selectBox"]){
                 target = $(elem).find(".timeTableSelectbox option:selected").attr("value");
             }else{
-                target = $(elem).attr("data-nameId");
+                target = $(elem).attr("id");
             }
             let time = this.c.getTotalShiftTime(target, this.v.shiftTime);
-            $(elem).append(`<td class="TimeTable__worktime">${time}</td>`);
+            $(elem).append(`<td class="TimeTable__worktime js-workTime">${time}</td>`);
+        });
+    }
+    /**
+     * Reasign name id when changing
+     */
+    changeNameId(){
+        // Different function because of scope
+        let shift = this.v.shiftTime;
+        $(document).on("change", ".js-timeSelectBox",function(){
+            let prevId;
+            let selectedId = $(this).val();
+            let _this = this;
+            let options = $(_this).children(["option"]);
+            for(let i = 0; i < options.length; i++){
+                // Delete "selected"
+                if($(options[i]).attr("selected")){
+                    $(options[i]).removeAttr("selected");
+                    prevId = $(options[i]).attr("value");
+                }
+                // Assign "selected"
+                if($(options[i]).attr("value") == selectedId){
+                    $(options[i]).attr("selected","");
+                }
+            }
+            // Reassign name-id
+            let sib = $(_this).parent().siblings();
+            for(let i = 0; i < sib.length; i++){
+                $(sib[i]).attr("data-nameid", selectedId);
+            }
+            // Change id of row
+            $(`#${prevId}`).attr("id",selectedId);
+            // Delete prevId from Shift data
+            delete shift[prevId];
         });
     }
 }
@@ -1021,6 +1071,16 @@ class Canvas extends Calculation{
         // For creating bar by drag&drop
         //this.stage.addEventListener("stagemousedown", this.handleDown);
         this.initialDraw();
+    }
+    /**
+     * Set process execute same timing as stage update
+     * This will be called manually add/delete bar
+     */
+    stageUpdate(){
+        this.stage.update();
+        if(this.v.option["workTime"]){
+            super.refreshWorkTime();
+        }
     }
     /**
     * Measure cell size and set to constructor
@@ -1123,7 +1183,7 @@ class Canvas extends Calculation{
             .lineTo(ec.x,ec.y)
             .endStroke();
         this.stage.addChild(shape);
-        this.stage.update();
+        this.stageUpdate();
         return shape;
     }
     /**
@@ -1207,7 +1267,7 @@ class Canvas extends Calculation{
                 $("#timeTableToolTip").remove();
                 $(shape).off("click");
                 this.deleteShiftData(time, index);
-                this.stage.update();
+                this.stageUpdate();
             });
             $(dom).append(deleteButton);
             $(".TimeTable").append(dom);
@@ -1232,7 +1292,7 @@ class Canvas extends Calculation{
                             // Delete Temporary Bar
                             if(this.tempShape){
                                 this.stage.removeChild(this.tempShape);
-                                this.stage.update();
+                                this.stageUpdate();
                             }
                             // Redraw Bar for not to delete when again drag & drop
                             let sTime = parseInt(this.startCoordinate.time,10);
@@ -1256,8 +1316,13 @@ class Canvas extends Calculation{
                             );
                             // Actual time to display in Tooltip
                             if(this.endCoordinate.over){
-                                eTime += parseInt(this.v.divTime,10);
+                                let divTime = parseInt(this.v.divTime,10);
+                                eTime += divTime;
+                                this.endCoordinate.time = divTime + parseInt(this.endCoordinate.time);
                             }
+                            this.addShiftData(color);
+                            // Manually reupdate for refresh worktime
+                            this.stageUpdate();
                             // Add mouse over Tooltip event
                             let time = "";
                             let coordinate = {};
@@ -1266,7 +1331,6 @@ class Canvas extends Calculation{
                             coordinate.x = this.startCoordinate.x;
                             coordinate.y = this.startCoordinate.y;
                             this.addTooltipEvent(shape, this.startCoordinate.index, time, coordinate);
-                            this.addShiftData();
                         });
                         startFlg = true;
                     }
@@ -1285,7 +1349,7 @@ class Canvas extends Calculation{
     addBarByClick(){
         if(this.tempShape){
             this.stage.removeChild(this.tempShape);
-            this.stage.update();
+            this.stageUpdate();
         }
         let start = this.startCoordinate;
         let end = this.endCoordinate;
@@ -1339,11 +1403,10 @@ class Canvas extends Calculation{
     /**
     * addShiftData
     *
-    * @param  {str} time  time to delete
-    * @param  {str} sId  To identify the row.
-    * @param  {object} shift  Object of shift to modify
+    * @param  {str} color : Color of Line
     */
-    addShiftData(){
+    addShiftData(color){
+        // Data to insert
         let index = this.startCoordinate.index;
         let sTime = super.int2Time(this.startCoordinate.time);
         let eTime = "";
@@ -1354,9 +1417,21 @@ class Canvas extends Calculation{
             eTime = super.int2Time(temp);
         }
         let name = super.getNameFromId(index);
-        console.log(index);
-        console.log(sTime);
-        console.log(eTime);
-        console.log(name);
+        let colorTimeObj = {};
+        colorTimeObj[`${color}`] = `${sTime}-${eTime}`;
+        // Seach index
+        let shift = this.v.shiftTime;
+        let isExist = Object.keys(shift).indexOf(index);
+        // index exist
+        if(isExist>=0){
+            let nameArr = Object.values(shift[index]);
+            nameArr[0].push(colorTimeObj);
+        // index Not exist
+        }else{
+            let nameObj = {};
+            let arr = [colorTimeObj];
+            nameObj[`${name}`] = arr;
+            shift[`${index}`] = nameObj;
+        }
     }
 }
