@@ -14,7 +14,7 @@
     cursor: default;
     font-size: 13px;
     white-space: nowrap;
-    width: auto;
+    width: 100%;
 }
 
 .TimeTable th{
