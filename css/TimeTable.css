@@ -1,9 +1,9 @@
 :root{
     /*--rgbBase: 0, 146, 80;/* Deep Green */
     /* Comment out sample colors */
-    /*--rgbBase: 34, 85, 136;/* Blue */
+    --rgbBase: 34, 85, 136;
     /*--rgbBase: 62, 186, 43;/* Lime Green */
-    --rgbBase: 218, 80, 25;/* Orange */
+    /*--rgbBase: 218, 80, 25;/* Orange */
     --rgbBaseFont: 50, 50, 50;
     --rgbHeaderFont: 255, 255, 255;
     --rgbRow: 255, 255, 255;
@@ -12,7 +12,7 @@
 .TimeTable{
     border-spacing: 0;
     cursor: default;
-    font-size: 14px;
+    font-size: 13px;
     white-space: nowrap;
     width: auto;
 }
@@ -47,8 +47,14 @@
 .TimeTable__row{
     background: rgba(var(--rgbRow), 1);
     color: rgba(var(--rgbBaseFont), 1);
-    max-width: 200px;
+    padding: 0 0 0 20px;
     text-align: center;
+}
+.TimeTable__name{
+    max-width: 800px;
+    padding: 0 20px;
+    position: relative;
+    text-align: left;
 }
 .TimeTable__row:nth-child(2n+1){
     background: rgba(var(--rgbBase), 0.1);
@@ -62,10 +68,12 @@
 }
 
 .timeTableSelectbox{
-    background-color: inherit;
+    background: inherit;
     border: none;
     color: rgba(var(--rgbBaseFont), 1);
+    cursor: pointer;
     height: 100%;
+    outline: none;
 }
 
 .timeTableToolTip{
@@ -89,10 +97,10 @@
 }
 
 .toolTipDelete{
-    background-color: rgba(var(--rgbBase), 1);
     background: rgba(var(--rgbBase), 1);
     border: none;
     color: rgba(var(--rgbHeaderFont), 1);
+    cursor: pointer;
     float: right;
     font-size: 15px;
     position: relative;
@@ -106,4 +114,26 @@
 
 .toolTipDelete:focus{
     outline: none;
+}
+
+.deleteRow{
+    background: rgba(var(--rgbBase), 0);
+    border: none;
+    color: rgba(var(--rgbBaseFont), 1);
+    cursor: pointer;
+    font-size: 15px;
+    height: 20px;
+    outline: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 20px;
+}
+.barCanvas{
+    cursor: pointer;
+}
+.deleteRow:active{
+    -ms-transform: translateY(1px);
+    -webkit-transform: translateY(1px);
+    transform: translateY(1px);
 }

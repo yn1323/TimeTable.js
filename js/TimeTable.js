@@ -6,7 +6,6 @@ gVal.DIV_TIME = null;
 gVal.SHIFT = null;
 gVal.OPTION = null;
 gVal.SELECTOR = null;
-// Decare Utility class
 // Class for calculation
 class Calculation{
     /**
@@ -209,22 +208,6 @@ class Calculation{
             name =  selectBoxNames[Id];
         }
         return name;
-    }
-    /**
-     * [refreshWorkTime description]
-     */
-    refreshWorkTime(){
-        let tbody = $("#TimeTable").find(".js-tdata");
-        tbody.each((i,elem)=>{
-            let target = "";
-            if(this.v.option["selectBox"]){
-                target = $(elem).find(".timeTableSelectbox option:selected").attr("value");
-            }else{
-                target = $(elem).attr("id");
-            }
-            let time = this.getTotalShiftTime(target, this.v.shiftTime);
-            $(elem).find(".js-workTime").html(time);
-        });
     }
 }
 // Class to manage messages
@@ -707,6 +690,8 @@ class Util extends Calculation{
                 break;
             }
         }
+        // TODO: Temporary fix
+        if(!element)return;
         let rect = element.getBoundingClientRect();
         obj.x = rect.left + window.pageXOffset;
         obj.y = rect.top + window.pageYOffset;
@@ -788,6 +773,22 @@ class Util extends Calculation{
         });
         return index;
     }
+    /**
+     * [refreshWorkTime description]
+     */
+    refreshWorkTime(){
+        let tbody = $("#TimeTable").find(".js-tdata");
+        tbody.each((i,elem)=>{
+            let target = "";
+            if(this.v.option["selectBox"]){
+                target = $(elem).find(".timeTableSelectbox option:selected").attr("value");
+            }else{
+                target = $(elem).attr("id");
+            }
+            let time = this.getTotalShiftTime(target, this.v.shiftTime);
+            $(elem).find(".js-workTime").html(time);
+        });
+    }
 }
 
 // Intial class to be called.
@@ -795,6 +796,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
     constructor(data){
         this.v = new Validation();
         this.c = new Calculation();
+        this.u = new Util();
         // Flag for when this instance got error
         this.errFlg = true;
         // End if necessary parameter was missing
@@ -844,6 +846,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         if(this.v.option["workTime"])this.setWorkTimeColumn();
         $(sel).append(this.table);
         if(this.v.option["selectBox"])this.changeNameId();
+        this.deleteRow();
         // Draw Chart
         this.can.init();
     }
@@ -930,10 +933,10 @@ class TimeTable{    // eslint-disable-line no-unused-vars
             if(this.v.option["selectBox"]){
                 // Required to create selecttag as string (Why?)
                 let select = this.createSelectBox(INDEX[i],NAMES[i]);
-                nameColumn = (`<td>${select}</td>`);
+                nameColumn = (`<td class="TimeTable__name">${select}<button class="deleteRow js-deleteButton" data-nameid="${INDEX[i]}">x</button></td>`);
                 //console.log(toString(this.selectbox));
             }else{
-                nameColumn = (`<td>${NAMES[i]}</td>`);
+                nameColumn = (`<td class="TimeTable__name">${NAMES[i]}<button class="deleteRow js-deleteButton" data-nameid="${INDEX[i]}">x</button></td>`);
             }
             td.prepend($(nameColumn));
         }
@@ -945,7 +948,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
     * @param  {str} name  [description]
     * @return {dom} selectTag
     */
-    createSelectBox(index,name){
+    createSelectBox(index=0,name=null){
         let selectTag = "<select class=\"timeTableSelectbox js-timeSelectBox\">";
         let str = "";
         let obj = this.v.option["selectBox"];
@@ -992,6 +995,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
     changeNameId(){
         // Different function because of scope
         let shift = this.v.shiftTime;
+        let deleteBar = (prevId)=>{this.can.deleteIdBar(prevId);};
         $(document).on("change", ".js-timeSelectBox",function(){
             let prevId;
             let selectedId = $(this).val();
@@ -1009,15 +1013,105 @@ class TimeTable{    // eslint-disable-line no-unused-vars
                 }
             }
             // Reassign name-id
+            // Delete Button
+            $(_this).next().attr("data-nameid",selectedId);
+            // td
             let sib = $(_this).parent().siblings();
             for(let i = 0; i < sib.length; i++){
                 $(sib[i]).attr("data-nameid", selectedId);
             }
             // Change id of row
-            $(`#${prevId}`).attr("id",selectedId);
+            if(prevId){
+                $(`#${prevId}`).attr("id",selectedId);
+            }else{
+                $(_this).parent().parent().attr("id",selectedId);
+            }
+
             // Delete prevId from Shift data
             delete shift[prevId];
+            deleteBar(prevId);
         });
+    }
+    /**
+     * [deleteRow description]
+     * @return {[type]} [description]
+     */
+    deleteRow(){
+        let shift = this.v.shiftTime;
+        let refresh = ()=>{this.refreshCanvas();};
+        $(document).on("click", ".js-deleteButton",function(){
+            let _this = this;
+            let id = $(_this).attr("data-nameid");
+            if($(".js-tdata").length > 1){
+                if(id){
+                    $(`#${id}`).remove();
+                    delete shift[id];
+                // No name row
+                }else{
+                    $(_this).parent().parent().remove();
+                }
+            }
+            refresh();
+        });
+    }
+    /**
+     * [deleteRow description]
+     * @return {[type]} [description]
+     */
+    addRow(){
+        if(!this.v.option["selectBox"])return;
+        if($(".js-tdata").length > 15)return;
+        // Crate row
+        let row = $("<tr></tr>", {class: "js-tdata TimeTable__row"});
+        // Create Name Column
+        $(row).append("<td class=\"TimeTable__name\"><button class=\"deleteRow js-deleteButton\"\">x</button></td>");
+        // Craete Table Data
+        const COLUMNS = this.c.countColumns(this.v.startTime, this.v.endTime, this.v.divTime);
+        for(let j = 0; j < COLUMNS; j++){
+            let timeAttr =  this.v.startTime + this.v.divTime * j;
+            let td = $("<td></td>");
+            // Set id for getting coordinate
+            // Use attr because of eslint setting (double-quote-enclosure)
+            td.attr("data-time", timeAttr);
+            row.append(td);
+        }
+        // Create Work Time Colummn
+        if(this.v.option["workTime"]){
+            $(row).append("<td class=\"TimeTable__worktime js-workTime\"></td>");
+        }
+        // Create SelectBox
+        if(this.v.option["selectBox"]){
+            let selectTag = "<select class=\"timeTableSelectbox js-timeSelectBox\">";
+            let str = "";
+            let obj = this.v.option["selectBox"];
+            for(let i in obj){
+                str += `<option value="${i}">${obj[i]}</option>`;
+            }
+            selectTag = selectTag + str + "</select>";
+            $(row).find(".TimeTable__name").prepend(selectTag);
+            $(row).find(".js-timeSelectBox").val("");
+        }
+        $("#TimeTable").append(row);
+        this.deleteRow();
+        this.u.refreshWorkTime();
+
+        this.refreshCanvas();
+    }
+    /**
+     * [refreshCanvas description]
+     * @return {[type]} [description]
+     */
+    refreshCanvas(){
+        $("#timeBar").off("mousedown");
+        $("#timeBar").remove();
+        this.can.init();
+    }
+    /**
+     * return ShiftDate
+     * @return {obj} shiftData
+     */
+    data(){
+        return this.v.shiftTime;
     }
 }
 
@@ -1068,8 +1162,6 @@ class Canvas extends Calculation{
         this.measureCellSize();
         this.setCanvasTag();
         this.stage = new createjs.Stage(this.canvasSelector);
-        // For creating bar by drag&drop
-        //this.stage.addEventListener("stagemousedown", this.handleDown);
         this.initialDraw();
     }
     /**
@@ -1079,7 +1171,7 @@ class Canvas extends Calculation{
     stageUpdate(){
         this.stage.update();
         if(this.v.option["workTime"]){
-            super.refreshWorkTime();
+            this.u.refreshWorkTime();
         }
     }
     /**
@@ -1105,7 +1197,7 @@ class Canvas extends Calculation{
         // Add cell size
         this.canvasTag.width = lastCell.x - firstCell.x + this.cell.width;
         this.canvasTag.height = lastCell.y - firstCell.y + this.cell.height;
-        let canvas = $("<canvas>",{id:"timeBar"});
+        let canvas = $("<canvas>",{id:"timeBar",class:"barCanvas"});
         canvas.css({
             position: "absolute",
             top: this.canvasTag.y,
@@ -1168,14 +1260,19 @@ class Canvas extends Calculation{
     * @return {obj} sc : StartCoordinate to display tooltip
     */
     drawLine(index,sTime,eTime,color,over){
+        // TODO: Temporary Fix
+        if(!sTime||!eTime)return;
         let [sc,ec] = this.calculateLineCoordinate(index,sTime,eTime,over);
         let barColor = this.color[parseInt(color,10)];
-        // => is delimeter of coordinate
+        // Set name for each bar
+        let obj = {};
+        let TimeObj = {};
+        TimeObj["start"] = sTime;
+        TimeObj["end"] = eTime;
+        obj[index] = TimeObj;
         let shape = new createjs.Shape().set({
-            name:`{${index}:{"start":${sTime},"end":${eTime}}`
+            name:obj
         });
-        //console.log(sc);
-        //console.log(ec);
         shape.graphics
             .setStrokeStyle(10)
             .beginStroke(barColor)
@@ -1195,6 +1292,8 @@ class Canvas extends Calculation{
     */
     a2R(coordinate){
         let obj = {};
+        // TODO:Temporary fix
+        if(!coordinate)return;
         obj.x = coordinate.x - this.canvasTag.x;
         obj.y = coordinate.y - this.canvasTag.y;
         return obj;
@@ -1286,6 +1385,8 @@ class Canvas extends Calculation{
                         // Decide starting place and index
                         let start = this.u.getCoordinateByClick(event);
                         this.startCoordinate = this.u.findNearestElementByCoordinate(this.startCoordinate, this.cell, start);
+                        // TODO: Temporary fix
+                        if(!this.startCoordinate.index)return;
                         $("#timeBar").on("mouseup",()=>{
                             $("#timeBar").off("mousemove");
                             $("#timeBar").off("mouseup");
@@ -1305,7 +1406,8 @@ class Canvas extends Calculation{
                                 sTime = parseInt(this.startCoordinate.time,10);
                                 eTime = parseInt(this.endCoordinate.time,10);
                             }
-                            let color = Math.floor(Math.random() * Math.floor(10));
+                            //let color = Math.floor(Math.random() * Math.floor(10));
+                            let color = 1;
                             // Draw confirmed line
                             let shape = this.drawLine(
                                 this.startCoordinate.index,
@@ -1433,5 +1535,23 @@ class Canvas extends Calculation{
             nameObj[`${name}`] = arr;
             shift[`${index}`] = nameObj;
         }
+    }
+    /**
+     * Delete Bar from matched id
+     * @return {[type]} [description]
+     */
+    deleteIdBar(id){
+        let barNum = this.stage.children.length;
+        for(let i = 0; i < barNum; i++){
+            // If index matches to stage name
+            if(Object.keys(this.stage.children[i].name).join("") === id){
+                //console.log(this.stage.children[i]);
+                this.stage.removeChild(this.stage.children[i]);
+                // Decrease the length of array
+                barNum--;
+                i--;
+            }
+        }
+        this.stageUpdate();
     }
 }
