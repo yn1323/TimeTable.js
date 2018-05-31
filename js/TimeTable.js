@@ -7,7 +7,7 @@ gVal.SHIFT = null;
 gVal.OPTION = null;
 gVal.SELECTOR = null;
 // Class for calculation
-class Calculation{
+class CalculationT{
     /**
     * Convert time working time into minutes
     * If ending time passes 00:00, add 1440(24H) to returning minutes.
@@ -211,7 +211,7 @@ class Calculation{
     }
 }
 // Class to manage messages
-class Message{
+class MessageT{
     constructor(){
         // Messages for Error
         this.ermsg = {};
@@ -248,10 +248,10 @@ class Message{
     }
 }
 // Setter & Getter of Global Variables
-class Validation extends Message{
+class ValidationT extends MessageT{
     constructor(){
         super();
-        this.calc = new Calculation();
+        this.calc = new CalculationT();
     }
     get startTime() {return gVal.START_TIME;}
     set startTime(x){if(this.checkStartTime(x)) gVal.START_TIME = this.checkStartTime(x);}
@@ -554,10 +554,10 @@ class Validation extends Message{
     }
 }
 // Util functions to measure coordinate
-class Util extends Calculation{
+class UtilT extends CalculationT{
     constructor(){
         super();
-        this.v = new Validation();
+        this.v = new ValidationT();
     }
     /*
     Generator to return color, startTime, endTime as variable
@@ -794,9 +794,9 @@ class Util extends Calculation{
 // Intial class to be called.
 class TimeTable{    // eslint-disable-line no-unused-vars
     constructor(data){
-        this.v = new Validation();
-        this.c = new Calculation();
-        this.u = new Util();
+        this.v = new ValidationT();
+        this.c = new CalculationT();
+        this.u = new UtilT();
         // Flag for when this instance got error
         this.errFlg = true;
         // End if necessary parameter was missing
@@ -827,7 +827,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
             return false;
         }
         // Make instance after passes validation has done
-        this.can = new Canvas();
+        this.can = new CanvasT();
     }
     /*
     To Create TimeTable
@@ -1115,11 +1115,11 @@ class TimeTable{    // eslint-disable-line no-unused-vars
     }
 }
 
-class Canvas extends Calculation{
+class CanvasT extends CalculationT{
     constructor(){
         super();
-        this.v = new Validation();
-        this.u = new Util();
+        this.v = new ValidationT();
+        this.u = new UtilT();
         this.color = [
             "#ff7f7f",
             "#7f7fff",
