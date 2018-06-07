@@ -1,7 +1,7 @@
 :root{
     /*--rgbBase: 0, 146, 80;/* Deep Green */
     /* Comment out sample colors */
-    --rgbBase: 34, 85, 136;
+    --rgbBase: 55, 123, 179; /* YPS Theme Color */
     /*--rgbBase: 62, 186, 43;/* Lime Green */
     /*--rgbBase: 218, 80, 25;/* Orange */
     --rgbBaseFont: 50, 50, 50;
@@ -80,7 +80,10 @@
     background: rgba(var(--rgbBase), 1);
     border-radius: 8px;
     color: rgba(var(--rgbHeaderFont), 1);
-    padding: 4px 8px;
+    padding: 4px 10px;
+    font-size: 15px;
+    vertical-align: bottom;
+    line-height: 18px;
     position: absolute;
     z-index: 9999;
 }
@@ -102,7 +105,9 @@
     color: rgba(var(--rgbHeaderFont), 1);
     cursor: pointer;
     float: right;
-    font-size: 15px;
+    font-size: 18px;
+    line-height: 18px;
+    vertical-align: top;
     position: relative;
 }
 

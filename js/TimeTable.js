@@ -337,6 +337,7 @@ class ValidationT extends MessageT{
     */
     checkShiftTime(shift){
         if(!this.shiftValidation(shift)    )return null;
+        if(!shift)shift={};
         return shift;
     }
     /*
@@ -892,6 +893,13 @@ class TimeTable{    // eslint-disable-line no-unused-vars
     @return {dom} base : Table tag include header and data
     */
     createTableData(base){
+        // When there is no shift
+        if(!Object.keys(this.v.shiftTime).length){
+            for(let i = 0; i < 3; i++){
+                this.addRow(base);
+            }
+            return base;
+        }
         const COLUMNS = this.c.countColumns(this.v.startTime, this.v.endTime, this.v.divTime);
         const NUMSHIFT = this.c.getNames(this.v.shiftTime).length;
         // Add as id
@@ -1043,6 +1051,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
             let _this = this;
             let id = $(_this).attr("data-nameid");
             if($(".js-tdata").length > 1){
+                //$(document).off("click", ".js-deleteButton");
                 if(id){
                     $(`#${id}`).remove();
                     delete shift[id];
@@ -1058,7 +1067,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
      * [deleteRow description]
      * @return {[type]} [description]
      */
-    addRow(){
+    addRow(target="#TimeTable"){
         if(!this.v.option["selectBox"])return;
         if($(".js-tdata").length > 15)return;
         // Crate row
@@ -1091,7 +1100,12 @@ class TimeTable{    // eslint-disable-line no-unused-vars
             $(row).find(".TimeTable__name").prepend(selectTag);
             $(row).find(".js-timeSelectBox").val("");
         }
-        $("#TimeTable").append(row);
+        $(target).append(row);
+        // When there is no shift
+        if(!Object.keys(this.v.shiftTime).length&&$(target).find(".js-workTime").length == 1){
+            $(target).find(".js-workTime").remove();
+            return;
+        }
         this.deleteRow();
         this.u.refreshWorkTime();
 
@@ -1112,6 +1126,18 @@ class TimeTable{    // eslint-disable-line no-unused-vars
      */
     data(){
         return this.v.shiftTime;
+    }
+    delete(){
+        let stage = this.can.stage;
+        let barNum = stage.children.length;
+        for(let i = 0; i < barNum; i++){
+            $(stage.children[i]).off("click");
+        }
+        $(document).off("change", ".js-timeSelectBox");
+        $(document).off("mouseup");
+        $("#timeBar").off("mousedown");
+        $("#timeBar").remove();
+        $("#TimeTable").remove();
     }
 }
 
@@ -1546,6 +1572,7 @@ class CanvasT extends CalculationT{
             // If index matches to stage name
             if(Object.keys(this.stage.children[i].name).join("") === id){
                 //console.log(this.stage.children[i]);
+                $(this.stage.children[i]).off("click");
                 this.stage.removeChild(this.stage.children[i]);
                 // Decrease the length of array
                 barNum--;
