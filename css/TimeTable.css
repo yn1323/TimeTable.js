@@ -1,10 +1,6 @@
 :root{
-    /*--rgbBase: 0, 146, 80;/* Deep Green */
-    /* Comment out sample colors */
-    --rgbBase: 55, 123, 179; /* YPS Theme Color */
-    /*--rgbBase: 62, 186, 43;/* Lime Green */
-    /*--rgbBase: 218, 80, 25;/* Orange */
-    --rgbBaseFont: 50, 50, 50;
+    --rgbTheme:19,113,71;
+    --rgbFont: 50, 50, 50;
     --rgbHeaderFont: 255, 255, 255;
     --rgbRow: 255, 255, 255;
 }
@@ -18,12 +14,12 @@
 }
 
 .TimeTable th{
-    background: rgba(var(--rgbBase), 1);
-    background: -moz-linear-gradient(rgba(var(--rgbBase), 0.7), rgba(var(--rgbBase), 0.9) 50%);
-    background: -webkit-gradient(linear, 100% 0%, 100% 50%, from(rgba(var(--rgbBase), 0.7)), to(rgba(var(--rgbBase), 0.9)));
-    border-bottom: 1px solid rgba(var(--rgbBase), 1);
-    border-left: 1px solid rgba(var(--rgbBase), 1);
-    border-top: 1px solid rgba(var(--rgbBase), 1);
+    background: rgba(var(--rgbTheme), 1);
+    background: -moz-linear-gradient(rgba(var(--rgbTheme), 0.7), rgba(var(--rgbTheme), 0.9) 50%);
+    background: -webkit-gradient(linear, 100% 0%, 100% 50%, from(rgba(var(--rgbTheme), 0.7)), to(rgba(var(--rgbTheme), 0.9)));
+    border-bottom: 1px solid rgba(var(--rgbTheme), 1);
+    border-left: 1px solid rgba(var(--rgbTheme), 1);
+    border-top: 1px solid rgba(var(--rgbTheme), 1);
     color: rgba(var(--rgbHeaderFont), 1);
     font-weight: bold;
     line-height: 1.2;
@@ -32,15 +28,15 @@
 }
 
 .TimeTable th:last-child{
-    border-right: 1px solid rgba(var(--rgbBase), 1);
+    border-right: 1px solid rgba(var(--rgbTheme), 1);
 }
 .TimeTable td:last-child{
-    border-right: 1px solid rgba(var(--rgbBase), 0.5);
+    border-right: 1px solid rgba(var(--rgbTheme), 0.5);
 }
 
 .TimeTable tr td{
-    border-bottom: 1px solid rgba(var(--rgbBase), 0.5);
-    border-left: 1px solid rgba(var(--rgbBase), 0.5);
+    border-bottom: 1px solid rgba(var(--rgbTheme), 0.5);
+    border-left: 1px solid rgba(var(--rgbTheme), 0.5);
     height: 30px;
 }
 
@@ -57,10 +53,10 @@
     text-align: left;
 }
 .TimeTable__row:nth-child(2n+1){
-    background: rgba(var(--rgbBase), 0.1);
+    background: rgba(var(--rgbTheme), 0.1);
 }
 .TimeTable__row:hover{
-    background: rgba(var(--rgbBase), 0.3);
+    background: rgba(var(--rgbTheme), 0.3);
 }
 
 .TimeTable__worktime{
@@ -77,7 +73,7 @@
 }
 
 .timeTableToolTip{
-    background: rgba(var(--rgbBase), 1);
+    background: rgba(var(--rgbTheme), 1);
     border-radius: 8px;
     color: rgba(var(--rgbHeaderFont), 1);
     padding: 4px 10px;
@@ -89,7 +85,7 @@
 }
 
 .timeTableToolTip:after{
-    border-left: 8px solid rgba(var(--rgbBase), 1);
+    border-left: 8px solid rgba(var(--rgbTheme), 1);
     border-top: 8px solid transparent;
     content: "";
     display: block;
@@ -100,7 +96,7 @@
 }
 
 .toolTipDelete{
-    background: rgba(var(--rgbBase), 1);
+    background: rgba(var(--rgbTheme), 1);
     border: none;
     color: rgba(var(--rgbHeaderFont), 1);
     cursor: pointer;
@@ -122,9 +118,9 @@
 }
 
 .deleteRow{
-    background: rgba(var(--rgbBase), 0);
+    background: rgba(var(--rgbTheme), 0);
     border: none;
-    color: rgba(var(--rgbBaseFont), 1);
+    color: rgba(var(--rgbFont), 1);
     cursor: pointer;
     font-size: 15px;
     height: 20px;
