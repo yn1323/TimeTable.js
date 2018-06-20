@@ -47,7 +47,7 @@
     text-align: center;
 }
 .TimeTable__name{
-    max-width: 800px;
+    width: 200px;
     padding: 0 20px;
     position: relative;
     text-align: left;
