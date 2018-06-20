@@ -850,6 +850,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         this.deleteRow();
         // Draw Chart
         this.can.init();
+        $(window).resize(()=>this.refreshCanvas());
     }
     /*
     Create Table for append document.
