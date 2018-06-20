@@ -23,7 +23,7 @@
     color: rgba(var(--rgbHeaderFont), 1);
     font-weight: bold;
     line-height: 1.2;
-    padding: 8px 15px;
+    padding: 8px 0;
     text-align: center;
 }
 
