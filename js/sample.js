@@ -101,7 +101,7 @@ $(document).on("click", "#addRow",()=>{instance.addRow();});
 // Change theme color sample
 $(document).on("click","#colorChange", ()=>{
     let color = `${getColor()},${getColor()},${getColor()}`;
-    document.documentElement.style.setProperty("--rgbBase", color);
+    document.documentElement.style.setProperty("--rgbTheme", color);
 });
 function getColor(){
     return Math.floor(Math.random() * Math.floor(255));
