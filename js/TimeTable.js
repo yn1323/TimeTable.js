@@ -1052,7 +1052,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
             let _this = this;
             let id = $(_this).attr("data-nameid");
             if($(".js-tdata").length > 1){
-                //$(document).off("click", ".js-deleteButton");
+                $("#timeTableToolTip").remove();
                 if(id){
                     $(`#${id}`).remove();
                     delete shift[id];
