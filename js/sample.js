@@ -88,7 +88,7 @@ let obj = {
             "40" : "C"
         },
         // Set true when using TimeTable inside of BootStrap class row
-        useBootStrap: true,
+        useBootStrap: false,
     }
 };
 // Call Time Table

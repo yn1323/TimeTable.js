@@ -12,6 +12,9 @@
     white-space: nowrap;
     width: 100%;
 }
+.TimeTable--bootstrap{
+    position: relative;
+}
 
 .TimeTable th{
     background: rgba(var(--rgbTheme), 1);

@@ -864,6 +864,9 @@ class TimeTable{    // eslint-disable-line no-unused-vars
     */
     createTable(){
         let base = $("<table>",{class: "TimeTable",id: "TimeTable"});
+        if(this.v.option["useBootStrap"]){
+            $(base).addClass("TimeTable--bootstrap");
+        }
         // Create Header
         base = this.createTableHeader(base);
         // Create Data
@@ -1236,7 +1239,7 @@ class CanvasT extends CalculationT{
         let top = this.canvasTag.y;
         let left = this.canvasTag.x;
         if(this.useBootStrap){
-            left = left + 15;
+            top = 32; // Height of Table Header
         }
         canvas.css({
             position: "absolute",
