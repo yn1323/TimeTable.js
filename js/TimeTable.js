@@ -271,6 +271,8 @@ class ValidationT extends MessageT{
     set table (x){gVal.TABLE = x;}
     get selectbox () {return gVal.SELECTBOX;}
     set selectbox (x){gVal.SELECTBOX = x;}
+    get useBootStrap () {return gVal.USEBOOTSTRAP;}
+    set useBootStrap (x){gVal.USEBOOTSTRAP = x;}
     /**
     * Check Existance of starttime, endtime, divtime
     * @param  {String} sTime Starting Time
@@ -350,6 +352,8 @@ class ValidationT extends MessageT{
         if(!option["workTime"])option["workTime"]   = false;
         // Set default value if there is no bgcolor option
         if(!option["selectBox"])option["selectBox"] = null;
+        // Set default value if there is no Bootstrap option
+        if(!option["useBootStrap"])option["useBootStrap"] = false;
         // Check each values;
         if(!this.optionValidation(option))return null;
         return option;
@@ -530,6 +534,9 @@ class ValidationT extends MessageT{
         try{
             // Check workTime
             target = option["workTime"];
+            if(typeof(target) !== "boolean")throw new Error(this.ermsg["NOT_BOOLEAN"]);
+            // Check Bootstrap
+            target = option["useBootStrap"];
             if(typeof(target) !== "boolean")throw new Error(this.ermsg["NOT_BOOLEAN"]);
             // Check bgColor
             target = option["bgcolor"];
@@ -1160,6 +1167,7 @@ class CanvasT extends CalculationT{
             "#ff7fff"
         ];
         this.workTime = this.v.workTime;
+        this.useBootStrap = this.v.option.useBootStrap;
         // Set option Color
         let optionColor = this.v.option.bgcolor;
         if(optionColor){
@@ -1225,14 +1233,19 @@ class CanvasT extends CalculationT{
         this.canvasTag.width = lastCell.x - firstCell.x + this.cell.width;
         this.canvasTag.height = lastCell.y - firstCell.y + this.cell.height;
         let canvas = $("<canvas>",{id:"timeBar",class:"barCanvas"});
+        let top = this.canvasTag.y;
+        let left = this.canvasTag.x;
+        if(this.useBootStrap){
+            left = left + 15;
+        }
         canvas.css({
             position: "absolute",
-            top: this.canvasTag.y,
-            left: this.canvasTag.x,
+            top: top,
+            left: left
         });
         canvas.attr({
             height: this.canvasTag.height,
-            width: this.canvasTag.width - this.cell.width,
+            width: this.canvasTag.width - this.cell.width
         });
         $(".TimeTable").prepend(canvas);
         this.canvasSelector = $("#timeBar").get(0);

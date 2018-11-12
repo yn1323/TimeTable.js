@@ -46,11 +46,12 @@ It worked jQuery 1.4.1+.
                   "1": "Sir Isaac Newton",
                   "2": "Galileo Galilei",
                   "3": "Mr.Smith"
-              }
+              },
+              // Set true when using TimeTable inside of BootStrap class row
+              useBootStrap: "false",
           }
       });
       ```
-
 ## Parameter & Options
 
 ### Author
