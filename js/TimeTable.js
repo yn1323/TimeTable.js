@@ -1232,7 +1232,7 @@ class CanvasT extends CalculationT{
         });
         canvas.attr({
             height: this.canvasTag.height,
-            width: this.canvasTag.width,
+            width: this.canvasTag.width - this.cell.width,
         });
         $(".TimeTable").prepend(canvas);
         this.canvasSelector = $("#timeBar").get(0);
