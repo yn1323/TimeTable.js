@@ -271,8 +271,8 @@ class ValidationT extends MessageT{
     set table (x){gVal.TABLE = x;}
     get selectbox () {return gVal.SELECTBOX;}
     set selectbox (x){gVal.SELECTBOX = x;}
-    get useBootStrap () {return gVal.USEBOOTSTRAP;}
-    set useBootStrap (x){gVal.USEBOOTSTRAP = x;}
+    get useBootstrap () {return gVal.USEBOOTSTRAP;}
+    set useBootstrap (x){gVal.USEBOOTSTRAP = x;}
     /**
     * Check Existance of starttime, endtime, divtime
     * @param  {String} sTime Starting Time
@@ -353,7 +353,7 @@ class ValidationT extends MessageT{
         // Set default value if there is no bgcolor option
         if(!option["selectBox"])option["selectBox"] = null;
         // Set default value if there is no Bootstrap option
-        if(!option["useBootStrap"])option["useBootStrap"] = false;
+        if(!option["useBootstrap"])option["useBootstrap"] = false;
         // Check each values;
         if(!this.optionValidation(option))return null;
         return option;
@@ -536,7 +536,7 @@ class ValidationT extends MessageT{
             target = option["workTime"];
             if(typeof(target) !== "boolean")throw new Error(this.ermsg["NOT_BOOLEAN"]);
             // Check Bootstrap
-            target = option["useBootStrap"];
+            target = option["useBootstrap"];
             if(typeof(target) !== "boolean")throw new Error(this.ermsg["NOT_BOOLEAN"]);
             // Check bgColor
             target = option["bgcolor"];
@@ -864,7 +864,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
     */
     createTable(){
         let base = $("<table>",{class: "TimeTable",id: "TimeTable"});
-        if(this.v.option["useBootStrap"]){
+        if(this.v.option["useBootstrap"]){
             $(base).addClass("TimeTable--bootstrap");
         }
         // Create Header
@@ -1170,7 +1170,7 @@ class CanvasT extends CalculationT{
             "#ff7fff"
         ];
         this.workTime = this.v.workTime;
-        this.useBootStrap = this.v.option.useBootStrap;
+        this.useBootstrap = this.v.option.useBootstrap;
         // Set option Color
         let optionColor = this.v.option.bgcolor;
         if(optionColor){
@@ -1238,7 +1238,7 @@ class CanvasT extends CalculationT{
         let canvas = $("<canvas>",{id:"timeBar",class:"barCanvas"});
         let top = this.canvasTag.y;
         let left = this.canvasTag.x;
-        if(this.useBootStrap){
+        if(this.useBootstrap){
             top = 32; // Height of Table Header
         }
         canvas.css({

@@ -48,7 +48,7 @@ It worked jQuery 1.4.1+.
                   "3": "Mr.Smith"
               },
               // Set true when using TimeTable inside of BootStrap class row
-              useBootStrap: "false",
+              useBootstrap: "false",
           }
       });
       ```
