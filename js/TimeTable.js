@@ -1136,7 +1136,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
      * @return {obj} shiftData
      */
     data(){
-        return this.v.shiftTime;
+        return JSON.parse(JSON.stringify(this.v.shiftTime));
     }
     delete(){
         let stage = this.can.stage;
