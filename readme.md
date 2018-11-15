@@ -1,14 +1,23 @@
 # TimeTable.js
-![NOTE_ICON](img/note.png)
+![NOTE_ICON](img/note.png)  
+  
+![demo](https://raw.github.com/wiki/yn1323/TimeTable.js/TimeTable01.gif)
+
+
 ## About
 JavaScript (ES6) library for creating time table.
 It worked jQuery 1.4.1+. 
+
+## Demo
+[Introdoction](https://www.jqueryscript.net/time-clock/JSON-Canvas-Time-Table-Generator.html)  
+[Demo](https://www.jqueryscript.net/demo/JSON-Canvas-Time-Table-Generator/)
 
 ## How to Use
    1. Load TimeTable.js, TimeTable.css, and jQuery in html.
       ```html
       <link rel="stylesheet" href="./TimeTable.css"/>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
+      <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
       <script src="./TimeTable.js"></script>
       ```
    1. Add division and class where you want to create Time Table.
@@ -52,10 +61,9 @@ It worked jQuery 1.4.1+.
           }
       });
       ```
-## Parameter & Options
 
 ### Author
-YN1323
+yn1323
 
 ### License
 TimeTable.js is licensed under MIT
