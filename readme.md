@@ -10,7 +10,7 @@ Requires jQuery 1.9.1+, CreateJS 1.0.0.
 
 ## Demo
 [Introdoction](https://www.jqueryscript.net/time-clock/JSON-Canvas-Time-Table-Generator.html)  
-[Demo](https://www.jqueryscript.net/demo/JSON-Canvas-Time-Table-Generator/)
+[Demo](https://yn1323.github.io/TimeTable.js/)
 
 ## How to Use
    1. Load TimeTable.js, TimeTable.css, and jQuery in html.
