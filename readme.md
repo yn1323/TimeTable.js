@@ -5,8 +5,11 @@
 
 
 ## About
-JavaScript (ES6) library for creating time table.  
+JavaScript (ES2015) library for creating time table.  
 Requires jQuery 1.9.1+, CreateJS 1.0.0.
+
+## Supporting Browser
+- Chrome
 
 ## Demo
 [Introdoction](https://www.jqueryscript.net/time-clock/JSON-Canvas-Time-Table-Generator.html)  
