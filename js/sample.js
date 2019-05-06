@@ -73,6 +73,8 @@ let obj = {
     shift: shiftObj,
     // Other options
     option: {
+        // column header caption, describing 
+        firstColumnCaption: "Character",
         // workTime include time not displaying
         workTime: true,
         bgcolor: ["#00FFFF"],

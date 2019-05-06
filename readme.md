@@ -52,6 +52,7 @@ Requires jQuery 1.9.1+, CreateJS 1.0.0.
           },
           // Other options
           option: {
+              // firstColumnCaption: "Scholar"
               // Display Total Time
               worktime: true,
               // Bar Color
