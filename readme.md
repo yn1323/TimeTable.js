@@ -66,6 +66,8 @@ Requires jQuery 1.9.1+, CreateJS 1.0.0.
                   "2": "Galileo Galilei",
                   "3": "Mr.Smith"
               },
+              // Set false if you want the rows to be static i.e. as defined in your shift object
+              deleteRows: true,
               // Set true when using TimeTable inside of BootStrap class row
               useBootstrap: false,
           }

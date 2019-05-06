@@ -948,14 +948,15 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         for(let i = 0; i < NAMES.length; i ++){
             let td = base.find(`#${INDEX[i]}`);
             let nameColumn = "";
+            let optionalDeleteButton = this.v.option.deleteRows ? (`<button class="deleteRow js-deleteButton" data-nameid="${INDEX[i]}">x</button>`) : "";
             // Different whether select box option exist
             if(this.v.option["selectBox"]){
                 // Required to create selecttag as string (Why?)
                 let select = this.createSelectBox(INDEX[i],NAMES[i]);
-                nameColumn = (`<td class="TimeTable__name">${select}<button class="deleteRow js-deleteButton" data-nameid="${INDEX[i]}">x</button></td>`);
+                nameColumn = (`<td class="TimeTable__name">${select}${optionalDeleteButton}</td>`);
                 //console.log(toString(this.selectbox));
             }else{
-                nameColumn = (`<td class="TimeTable__name">${NAMES[i]}<button class="deleteRow js-deleteButton" data-nameid="${INDEX[i]}">x</button></td>`);
+                nameColumn = (`<td class="TimeTable__name">${NAMES[i]}${optionalDeleteButton}</td>`);
             }
             td.prepend($(nameColumn));
         }
@@ -1083,8 +1084,9 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         if($(".js-tdata").length > 15)return;
         // Crate row
         let row = $("<tr></tr>", {class: "js-tdata TimeTable__row"});
+        let optionalDeleteButton = this.v.option.deleteRows ? "<button class=\"deleteRow js-deleteButton\">x</button>" : "";
         // Create Name Column
-        $(row).append("<td class=\"TimeTable__name\"><button class=\"deleteRow js-deleteButton\"\">x</button></td>");
+        $(row).append((`<td class="TimeTable__name">${optionalDeleteButton}</td>`));
         // Craete Table Data
         const COLUMNS = this.c.countColumns(this.v.startTime, this.v.endTime, this.v.divTime);
         for(let j = 0; j < COLUMNS; j++){

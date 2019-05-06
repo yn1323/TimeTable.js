@@ -87,6 +87,8 @@ let obj = {
             "39" : "B",
             "40" : "C"
         },
+        // Set false if you want the rows to be static i.e. as defined in your shift object
+        deleteRows: true,
         // Set true when using TimeTable inside of BootStrap class row
         useBootstrap: false,
     }
