@@ -942,7 +942,7 @@ class TimeTable{    // eslint-disable-line no-unused-vars
         const NAMES = this.c.getNames(this.v.shiftTime);
         // id for find
         const INDEX = this.c.getIndex(this.v.shiftTime);
-        const CAPTION = this.v.option.firstColumnCaption || "CAPTION";
+        const CAPTION = this.v.option.firstColumnCaption || "NAME";
         // Column of Header
         base.find("#theader").prepend("<th>" + CAPTION + "</th>");
         // Column of Data
