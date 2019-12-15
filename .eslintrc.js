@@ -1,25 +1,23 @@
 module.exports = {
     "env": {
         "browser": true,
-        "es6": true,
-        "node": true,
-        "jquery" : true
-    },
-    "globals": {
-        "TimeTable": true,
-        "stage": false,
-        "createjs": false,
-        "describe": false,
-        "it": false,
-        "expect": false,
-        "jasmine": false
+        "es6": true
     },
     "extends": "eslint:recommended",
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly",
+        "module": false,
+        "require": false,
+        "process": false,
+        "__dirname": false
+    },
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+    },
     "rules": {
-        "no-console"      : ["error", { allow: ["warn", "error"] }],
-        "indent"          : ["error",4],
-        "linebreak-style" : ["error","windows"],
-        "quotes"          : ["error","double"],
-        "semi"            : ["error","always"]
+        "eqeqeq": "warn",
+        "quotes": ["warn", "single"]
     }
 };
