@@ -38,4 +38,6 @@ module.exports = {
 // Change Path in production mode
 if (process.env.NODE_ENV === 'production'){
   module.exports.output.path = path.resolve(__dirname, 'dist')
+}else{
+  module.exports.devtool = 'source-map';
 }
