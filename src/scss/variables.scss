@@ -1,0 +1,17 @@
+// colors
+$baseColor: #3261AB;
+
+$headerColor: lighten($baseColor, 10);
+$borderColor: darken($baseColor, 10);
+$evenRowColor: mix($baseColor, #fff, 20);
+
+$headerFontColor: lighten($baseColor, 70);
+$bodyFontColor: #333;
+
+// size
+$nameWidth: 300px;
+$subTotalWidth: 50px;
+$rowHeight: 30px;
+
+$border: 1px solid $borderColor;
+$fontSize: 15px;

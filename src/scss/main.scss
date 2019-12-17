@@ -1,5 +1,5 @@
-@charset "UTF-8";
-
-body {
-  background: #eaeaea;
-}
+@import 'variables';
+@import 'mixins';
+// Desktop Mode
+@import 'desktop';
+@import 'mobile';

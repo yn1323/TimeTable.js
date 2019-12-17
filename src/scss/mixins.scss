@@ -1,0 +1,7 @@
+@mixin border($position: ''){
+  @if $position != '' {
+    border-#{$position}: $border;
+  }@else{
+    border: $border;
+  }
+}
