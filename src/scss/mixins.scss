@@ -5,3 +5,9 @@
     border: $border;
   }
 }
+
+@mixin responsive($screen){
+  @media screen and (#{$screen}: $breakPoint){
+    @content;
+  }
+}
