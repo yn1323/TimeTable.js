@@ -1,12 +1,11 @@
 @import 'variables';
 @import 'mixins';
 
-
 // Desktop Mode
-@include responsive(min-width){
+@include responsive(min-width) {
   @import 'desktop';
 }
 // Mobile Mode
-@include responsive(max-width){
+@include responsive(max-width) {
   @import 'mobile';
 }

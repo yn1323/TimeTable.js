@@ -1,81 +1,84 @@
+// hide in desktop
+.tt-time{
+  display: none;
+}
 // layout of stable cell
-.tt-name{
+.tt-name {
   width: $nameWidth;
 }
-.tt-subtotal{
+.tt-subtotal {
   width: $subTotalWidth;
 }
-.tt-row > div{
+.tt-row > div {
   height: $rowHeight;
 }
 // layout of table
-.timetable{
+.timetable {
   display: flex;
   flex-direction: column;
   border-radius: 3px;
   // border for whole table
   @include border;
-  .tt-row{
+  .tt-row {
     display: flex;
     flex: 1;
     flex-direction: row;
     // horizontal border
-    &:not(:first-child){
-      @include border(top);
+    &:not(:first-child) {
+      @include border($borderColor, top);
     }
     // vertical border
-    &>div{
-      &:not(:first-child){
-        @include border(left);
+    & > div {
+      &:not(:first-child) {
+        @include border($borderColor, left);
       }
-      &:not(.tt-name):not(.tt-subtotal){
-        flex:1;
+      &:not(.tt-name):not(.tt-subtotal) {
+        flex: 1;
       }
     }
   }
 }
 
 // layout of color
-.tt-row{
-  &:first-child{
+.tt-row {
+  &:first-child {
     background: $headerColor;
   }
-  &:not(:first-child){
-    &:nth-child(2n + 1){
+  &:not(:first-child) {
+    &:nth-child(2n + 1) {
       background: $evenRowColor;
     }
   }
 }
 
 // layout of cell
-.tt-cell{
+.tt-cell {
   display: flex;
   flex-direction: row;
-  &>div{
+  & > div {
     flex: 1;
     display: flex;
     flex-direction: column;
-    &:not(:first-child){
-      @include border(left);
+    &:not(:first-child) {
+      @include border($borderColorLight, left);
     }
-    &>div{
+    & > div {
       flex: 1;
     }
   }
 }
 
-
 // layout of text
-.tt-row{
+.tt-row {
   font-size: $fontSize;
   line-height: $rowHeight;
-  overflow:hidden;
+  overflow: hidden;
   text-align: center;
   text-overflow: ellipsis;
-  &:first-child > div{
+  &:first-child > div {
     color: $headerFontColor;
   }
-  &:not(:first-child) > div{
+  &:not(:first-child) > div {
     color: $bodyFontColor;
   }
 }
