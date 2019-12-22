@@ -1,0 +1,18 @@
+$breakPoint: 896px;
+// colors
+$baseColor: #3261ab;
+$bodyFontColor: #333;
+
+$headerColor: lighten($baseColor, 10);
+$borderColor: darken($baseColor, 10);
+$borderColorLight: lighten($baseColor, 40);
+$evenRowColor: mix($baseColor, #fff, 20);
+
+$headerFontColor: lighten($baseColor, 70);
+
+// size
+$nameWidth: 300px;
+$subTotalWidth: 50px;
+$rowHeight: 30px;
+
+$fontSize: 15px;

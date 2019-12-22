@@ -1,0 +1,13 @@
+@mixin border($color: $borderColor, $position: '') {
+  @if $position != '' {
+    border-#{$position}: 1px solid $color;
+  } @else {
+    border: 1px solid $color;
+  }
+}
+
+@mixin responsive($screen) {
+  @media screen and (#{$screen}: $breakPoint) {
+    @content;
+  }
+}
