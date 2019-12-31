@@ -1,5 +1,5 @@
 // hide in desktop
-.tt-time{
+.tt-time {
   display: none;
 }
 // layout of stable cell
@@ -45,6 +45,9 @@
     background: $headerColor;
   }
   &:not(:first-child) {
+    &:hover {
+      background: $hoverColor !important;
+    }
     &:nth-child(2n + 1) {
       background: $evenRowColor;
     }

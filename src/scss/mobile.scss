@@ -1,29 +1,29 @@
 // hide in mobile
-.tt-header{
+.tt-header {
   display: none;
 }
-.tt-name{
-  ~ *:not(.tt-time){
+.tt-name {
+  ~ *:not(.tt-time) {
     display: none;
   }
 }
 
 // layout of table
-.timetable{
-  display:flex;
+.timetable {
+  display: flex;
   flex-direction: column;
-  .tt-data{
+  .tt-data {
     display: flex;
     flex: 1;
     flex-direction: column;
-    .tt-name{
+    .tt-name {
       flex: 1;
     }
   }
-  .tt-row{
+  .tt-row {
     @include border;
     border-radius: 3px;
-    &:not(:nth-child(2)){
+    &:not(:nth-child(2)) {
       margin-top: 5px;
     }
   }
@@ -40,16 +40,16 @@
 }
 
 // lauout of text
-.tt-row{
+.tt-row {
   font-size: $fontSize * 1.3;
   line-height: $rowHeight * 1.3;
   overflow: hidden;
   text-align: center;
   text-overflow: ellipsis;
 }
-.tt-name{
+.tt-name {
   color: $headerFontColor;
 }
-.tt-time{
+.tt-time {
   color: $bodyFontColor;
 }
