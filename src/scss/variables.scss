@@ -6,7 +6,8 @@ $bodyFontColor: #333;
 $headerColor: lighten($baseColor, 10);
 $borderColor: darken($baseColor, 10);
 $borderColorLight: lighten($baseColor, 40);
-$evenRowColor: mix($baseColor, #fff, 20);
+$evenRowColor: mix($baseColor, #fff, 10);
+$hoverColor: mix($baseColor, #fff, 20);
 
 $headerFontColor: lighten($baseColor, 70);
 
