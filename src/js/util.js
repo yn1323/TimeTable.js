@@ -5,8 +5,8 @@ const util = {
   convVal: (val, type) => {
     if (typeof val === type) return val
     const convert = {
-      number: val => isNaN(val)? undefined: parseInt(val),
-      boolean: val => val.toLowerCase() === 'false'? false: !!val
+      number: val => (isNaN(val) ? undefined : parseInt(val)),
+      boolean: val => (val.toLowerCase() === 'false' ? false : !!val)
     }
 
     try {

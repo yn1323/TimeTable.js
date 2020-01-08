@@ -1,2 +1,5 @@
+.DS_Store
 node_modules
-src/dist
+public/bundle.*
+package-lock.json
+yarn.lock

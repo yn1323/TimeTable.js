@@ -4,12 +4,30 @@
   "description": "Best Library to create Time Table",
   "main": "./dist/TimeTable.js",
   "scripts": {
-    "start": "npm run webpack:watch & npm run server:watch",
-    "bundle": "prettier --write './src/**/*.{js,scss}' && NODE_ENV=production webpack --mode production",
+    "build": "prettier --write './src/**/*.{js,scss,svelte}' && cross-env NODE_ENV=production webpack",
+    "dev": "webpack-dev-server --content-base sample",
     "test": "jest --watch",
-    "webpack:watch": "webpack --watch",
-    "server:watch": "live-server ./src",
-    "lint": "prettier --write './src/**/*.{js,scss}'"
+    "lint": "prettier --write './src/**/*.{js,scss,svelte}'"
+  },
+  "devDependencies": {
+    "svelte": "^3.0.0",
+    "svelte-loader": "2.13.3",
+    "svelte-preprocess": "^3.3.0",
+    "cross-env": "^5.2.0",
+    "serve": "^11.0.0",
+    "css-loader": "^2.1.1",
+    "style-loader": "^0.23.1",
+    "node-sass": "^4.13.0",
+    "sass-loader": "^8.0.0",
+    "jest": "^24.9.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "eslint": "^6.7.2",
+    "eslint-plugin-svelte3": "^2.7.3",
+    "prettier": "^1.19.1",
+    "prettier-plugin-svelte": "^0.7.0",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.0",
+    "webpack-dev-server": "^3.3.1"
   },
   "repository": {
     "type": "git",
@@ -20,18 +38,5 @@
   "bugs": {
     "url": "https://github.com/yn1323/TimeTable.js/issues"
   },
-  "homepage": "https://github.com/yn1323/TimeTable.js#readme",
-  "devDependencies": {
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
-    "css-loader": "^3.3.2",
-    "eslint": "^6.7.2",
-    "jest": "^24.9.0",
-    "live-server": "^1.2.1",
-    "node-sass": "^4.13.0",
-    "prettier": "^1.19.1",
-    "sass-loader": "^8.0.0",
-    "style-loader": "^1.0.1",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
-  }
+  "homepage": "https://github.com/yn1323/TimeTable.js#readme"
 }

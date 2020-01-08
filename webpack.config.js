@@ -1,43 +1,57 @@
 const path = require('path');
 
-module.exports = {
-  mode: 'development',
-  entry: {
-    js: './src/js/main.js'
-  },
-  output: {
-    // Path to bundle
-    path: path.resolve(__dirname, 'src/dist'),
-    filename: './TimeTable.js'
-  },
-  module: {
-    rules: [
-      // To use Sass
-      {
-        test: /\.scss/,
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              url: false
-            },
-          },
-          {
-            loader: 'sass-loader',
-            options: {
-              sourceMap: true,
-            }
-          }
-        ]
-      }
-    ],
-  }
-}
+const mode = process.env.NODE_ENV || 'development';
+const prod = mode === 'production';
 
-// Change Path in production mode
-if (process.env.NODE_ENV === 'production'){
-  module.exports.output.path = path.resolve(__dirname, 'dist')
-}else{
-  module.exports.devtool = 'source-map';
-}
+module.exports = {
+	entry: {
+		bundle: ['./src/main.js']
+	},
+	resolve: {
+		alias: {
+			svelte: path.resolve('node_modules', 'svelte')
+		},
+		extensions: ['.mjs', '.js', '.svelte'],
+		mainFields: ['svelte', 'browser', 'module', 'main']
+	},
+	output: {
+		path: __dirname + '/dist',
+		filename: './TimeTable.js',
+		chunkFilename: './TimeTable.[id].js'
+	},
+	module: {
+		rules: [
+			{
+				test: /\.svelte$/,
+				use: {
+					loader: 'svelte-loader',
+					options: {
+						preprocess: require('svelte-preprocess')({ scss: true }),
+						hotReload: true
+					}
+				}
+			},
+			// To use Sass
+			{
+				test: /\.scss/,
+				use: [
+					'style-loader',
+					{
+						loader: 'css-loader',
+						options: {
+							url: false
+						},
+					},
+					{
+						loader: 'sass-loader',
+						options: {
+							sourceMap: true,
+						}
+					}
+				]
+			}
+		]
+	},
+	mode,
+	devtool: prod ? false: 'source-map'
+};
