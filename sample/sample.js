@@ -54,4 +54,4 @@ let sample = {
   }
 }
 
-TimeTable(sample)
+TimeTable(document.getElementById('TimeTable'), sample)
