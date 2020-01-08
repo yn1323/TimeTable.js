@@ -1,5 +1,3 @@
 <script>
-  export let name
+  export let info
 </script>
-
-<h1>Hello {name}!</h1>
