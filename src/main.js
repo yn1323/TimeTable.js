@@ -3,7 +3,7 @@ import './scss/main.scss'
 
 window.TimeTable = obj =>
   new App({
-    target: document.getElementById("TimeTable"),
+    target: document.getElementById('TimeTable'),
     props: {
       info: obj
     }
