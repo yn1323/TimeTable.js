@@ -1,23 +1,54 @@
 import valid from '../src/js/validation'
 import msg from '../src/js/msg'
 
-describe('/src/js/validation', ()=>{
-  test('checkLength()', ()=>{
-    const plan = [
-      { p1: '09:00', p2: 5, e: true },
-      { p1: '9:00', p2: 5, e: false },
-      { p1: '09:00-18:00', p2: 11, e: true },
-      { p1: '09:0018:00', p2: 11, e: false },
-    ]
-    plan.forEach(t => expect(valid.checkLength(t.p1, t.p2)).toBe(t.e))
+describe('checkLength()', ()=>{
+  test.each`
+    a                | b     | expected
+    ${'09:00'}       | ${5}  | ${true}
+    ${'9:00'}        | ${5}  | ${false}
+    ${'09:00-18:00'} | ${11} | ${true}
+    ${'09:0018:00'}  | ${11} | ${false}
+  `('$a, $b => $expected', ({ a, b, expected }) => {
+    expect(valid.checkLength(a, b)).toBe(expected);
+  });  
+});
+
+describe('checkDelimeter()', () => {
+  test.each`
+    a                | b    | c      | expected
+    ${'09:00'}       | ${2} | ${':'} | ${true}
+    ${'09-00'}       | ${2} | ${':'} | ${false}
+    ${'09:00-18:00'} | ${5} | ${'-'} | ${true}
+    ${'09:00=18:00'} | ${5} | ${'-'} | ${false}
+  `('$a, $b, $c => $expected', ({ a, b, c, expected }) => {
+    expect(valid.checkDelimeter(a, b, c)).toBe(expected);
   });
-  test('checkDelimeter()', () => {
-    const plan = [
-      { p1: '09:00', p2: 2, p3: ':', e: true },
-      { p1: '09-00', p2: 2, p3: ':', e: false },
-      { p1: '09:00-18:00', p2: 5, p3: '-', e: true },
-      { p1: '09:00=18:00', p2: 5, p3: '-', e: false },
-    ]
-    plan.forEach(t => expect(valid.checkDelimeter(t.p1, t.p2,t.p3)).toBe(t.e))
+});
+
+describe('isTimeFormat()', () => {
+  test.each`
+    a          | expected
+    ${'09:00'} | ${undefined}
+    ${'9:00'}  | ${msg.TIME_FORMAT}
+    ${'09-00'} | ${msg.TIME_DELIMETER}
+  `('$a => $expected', ({ a, expected }) => {
+    expect(valid.isTimeFormat(a)).toBe(expected);
   });
-})
+});
+
+describe('isDivTimeFormat()', () => {
+  test.each`
+    a       | expected
+    ${'15'} | ${undefined}
+    ${15}   | ${undefined}
+    ${0}    | ${msg.TIME_DIV_RANGE}
+    ${1}    | ${undefined}
+    ${60}   | ${undefined}
+    ${'11'} | ${msg.TIME_DIV_RANGE}
+    ${11}   | ${msg.TIME_DIV_RANGE}
+    ${true} | ${msg.TIME_DIV_RANGE}
+    ${[11]} | ${msg.TIME_DIV_RANGE}
+  `('$a => $expected', ({ a, expected }) => {
+    expect(valid.isDivTimeFormat(a)).toBe(expected);
+  });
+});
