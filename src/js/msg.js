@@ -1,4 +1,8 @@
 const msg = {
+  // Initial Parameter
+  PARAM_ERROR_NOTFOUND: `[PARAM] 1ST PARAM ELEMENT DOES NOT EXIST`,
+  PARAM_ERROR_TYPE: `[PARAM] 1ST AND 2ND PARAMETER HAS TO BE OBJECT`,
+  PARAM_ERROR_COUNT: `[PARAM] 2ND PARAM'S NECESSARY KEYS ARE MISSING`,
   TIME_FORMAT: `[TIME] TIME LENGTH IS NOT 5. FORMAT HAS TO BE 'HH:MM'`,
   TIME_DELIMETER: `[TIME] DELIMETER SHOULD BE ':' IN 3RD CHARACTER`,
   TIME_HOUR_RANGE: `[TIME] HOUR HAS TO BE BETWEEN 00 to 23`,
@@ -12,7 +16,11 @@ const msg = {
   DATA_NOT_NUMBER: `[DATA] HAS TO BE NUMBER`,
   DATA_NOT_BOOLEAN: `[DATA] HAS TO BE BOOLEAN`,
   // Required
-  REQUIRED: str => `${str} IS NECESSARY`
+  REQUIRED: str => `${str} IS NECESSARY`,
+  // Data Type
+  DATA_TYPE: (target, correct) => `${target} HAS TO BE ${correct}`,
+  // Data Type
+  NOT_FOUND: target => `${target} NOT FOUND`
 }
 
 export default msg

@@ -16,41 +16,42 @@ let sample = {
   // Ending Time[Necessary]
   endTime: '15:00',
   // Time to divide(minute)[Necessary]
-  divTime: '15',
-  // Time Table Data[Necessary]
-  shift: {
-    '1': {
-      'Sir Isaac Newton': {
-        '1': '10:00-12:00',
-        '2': '13:00-14:00'
-      }
+  divTime: 15,
+  // Value to bind to index[Necessary]
+  selection: [
+    { index: 1, val: 'Isaac Newton' },
+    { index: 5, val: 'Galileo Galilei' }
+  ],
+  // Time Table Data of initially show[optional]
+  timetable: [
+    {
+      // index number of row
+      index: 1,
+      time: [
+        // color: color of bar
+        // time: time to color
+        { color: 1, time: '10:00-12:00' },
+        { color: 2, time: '13:00-14:00' }
+      ]
     },
-    '2': {
-      'Galileo Galilei': {
-        '3': '11:00-12:45'
-      }
+    {
+      index: 5,
+      time: [
+        { color: 3, time: '11:00-12:45' },
+        { color: 2, time: '13:00-14:00' }
+      ]
     }
-  },
-  // Other options
+  ],
+  // Options[optional]
   option: {
-    // Default value: 'NAME'
-    firstColumnCaption: 'Scholar',
-    // Display Total Time
-    worktime: true,
-    // Bar Color
-    // Able to apply till 10 colors
-    // bgcolor: ['#00ffff', '#ff0000'],
-    // Selectbox for Name Column[Necessary]
-    // selectBox index and shift index should be same
-    //{index :  name, : index: name,,..}
-    // Give random if shift index was not in selectBox index
-    selectBox: {
-      '1': 'Sir Isaac Newton',
-      '2': 'Galileo Galilei',
-      '3': 'Mr.Smith'
-    },
-    // Set false if you want the rows to be static i.e. as defined in your shift object
-    deleteRows: true
+    // First column header(Defaul is Name)
+    firstColumnCaption: 'Name',
+    // Show total time columns(Default is true)
+    showTotal: true,
+    // Enable to delete row(Default is true)
+    deleteRows: true,
+    // Minumum rows to show(Default is 3)
+    minimumRows: 3,
   }
 }
 
