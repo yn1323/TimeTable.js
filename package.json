@@ -7,6 +7,7 @@
     "build": "prettier --write './src/**/*.{js,scss,svelte}' && cross-env NODE_ENV=production webpack",
     "dev": "webpack-dev-server --content-base sample",
     "test": "jest --watch",
+    "coverage": "jest --watchAll --coverage",
     "lint": "prettier --write './src/**/*.{js,scss,svelte}'"
   },
   "devDependencies": {
