@@ -4,7 +4,8 @@ import util from './util.js'
 const validation = {
   // Param check of call TimeTable()
   initialParamCheck: (selector, obj) => {
-    if (typeof selector !== 'object' || typeof obj !== 'object') return msg.PARAM_ERROR_TYPE
+    if (typeof selector !== 'object' || typeof obj !== 'object')
+      return msg.PARAM_ERROR_TYPE
     if (!selector) return msg.PARAM_ERROR_NOTFOUND
     if (Object.keys(obj).length < 4) return msg.PARAM_ERROR_COUNT
   },
@@ -35,6 +36,15 @@ const validation = {
     if (!validation.checkLength(str, 5)) return msg.TIME_FORMAT
     // OK: '09:00', NG: '09-00'
     if (!validation.checkDelimeter(str, 2, ':')) return msg.TIME_DELIMETER
+    // OK: '09:00', NG: '09:20'
+    if (!validation.isMinuteDividable(str.substring(3, 5), 0))
+      return msg.TIME_MINUTE_EXACT('00')
+  },
+  isMinuteDividable: (minute, divider) => {
+    minute = typeof minute !== 'number' ? parseInt(minute, 0) : minute
+    if (minute === 0) return true
+    if (divider === 0) return false
+    return minute % divider === 0 ? true : false
   },
   isTimeTermFormat: str => {},
   isDivTimeFormat: str => {
@@ -42,16 +52,16 @@ const validation = {
     if (!Number.isInteger(60 / num)) return msg.TIME_DIV_RANGE
   },
   isSelectionFormat: arr => {
-    if(!Array.isArray(arr)) return msg.DATA_TYPE(arr, 'Array')
+    if (!Array.isArray(arr)) return msg.DATA_TYPE(arr, 'Array')
 
-    for(let i = 0, len = arr.length; i < len; i++){
-      let obj = arr[i];
+    for (let i = 0, len = arr.length; i < len; i++) {
+      let obj = arr[i]
       if (!obj.index) return msg.NOT_FOUND('selection[n].index')
-      if (!Number.isInteger(obj.index)) return msg.DATA_TYPE(obj.index, 'number')
+      if (!Number.isInteger(obj.index))
+        return msg.DATA_TYPE(obj.index, 'number')
       if (!obj.val) return msg.NOT_FOUND('selection[n].val')
       if (typeof obj.val !== 'string') return msg.DATA_TYPE(obj.val, 'string')
     }
-    
   }
 }
 

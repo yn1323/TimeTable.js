@@ -11,10 +11,10 @@ DEBUGS.forEach(elem => {
 
 // Object to send to TimeTable method
 let sample = {
-  // Beginning Time[Necessary]
-  startTime: '10:00',
-  // Ending Time[Necessary]
-  endTime: '15:00',
+  // Beginning Time[Necessary](Minute has to be 00)
+  startTime: '08:00',
+  // Ending Time[Necessary](Minute has to be 00)
+  endTime: '23:00',
   // Time to divide(minute)[Necessary]
   divTime: 15,
   // Value to bind to index[Necessary]

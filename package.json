@@ -39,5 +39,6 @@
   "bugs": {
     "url": "https://github.com/yn1323/TimeTable.js/issues"
   },
-  "homepage": "https://github.com/yn1323/TimeTable.js#readme"
+  "homepage": "https://github.com/yn1323/TimeTable.js#readme",
+  "dependencies": {}
 }

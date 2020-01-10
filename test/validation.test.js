@@ -45,8 +45,22 @@ describe('isTimeFormat()', () => {
     ${'09:00'} | ${undefined}
     ${'9:00'}  | ${msg.TIME_FORMAT}
     ${'09-00'} | ${msg.TIME_DELIMETER}
+    ${'09:01'} | ${msg.TIME_MINUTE_EXACT('00')}
   `('$a => $expected', ({ a, expected }) => {
     expect(valid.isTimeFormat(a)).toBe(expected);
+  });
+});
+
+describe('isMinuteDividable()', () => {
+  test.each`
+    a       | b     | expected
+    ${'00'} | ${0}  | ${true}
+    ${0}    | ${0}  | ${true}
+    ${'30'} | ${15} | ${true}
+    ${20}   | ${40} | ${false}
+    ${51}   | ${3}  | ${true}
+  `('$a, $b => $expected', ({ a, b, expected }) => {
+    expect(valid.isMinuteDividable(a, b)).toBe(expected);
   });
 });
 
