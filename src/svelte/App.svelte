@@ -1,7 +1,8 @@
 <script>
   export let data
-  import {startTime, endTime, divTime, selection, option} from '../js/store.js'
-  import Header from './Header.svelte'
+  import {startTime, endTime, divTime, selection, option} from '../js/store'
+  import Header from './Header'
+  import Body from './Body'
   // Set initial store
   startTime.set(data.startTime)
   endTime.set(data.endTime)
@@ -12,4 +13,5 @@
 
 <div class="timetable">
   <Header />
+  <Body />
 </div>
